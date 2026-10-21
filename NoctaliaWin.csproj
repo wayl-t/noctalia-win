@@ -13,7 +13,7 @@
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <Version>0.4.1</Version>
+    <Version>0.4.2</Version>
     <Product>NoctaliaWin</Product>
     <Description>Нативная панель для Windows в стиле Noctalia</Description>
   </PropertyGroup>
@@ -21,6 +21,11 @@
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Шрифт иконок Tabler, как в оригинальном Noctalia (assets/fonts/noctalia-tabler.ttf). -->
+    <Resource Include="Assets\noctalia-tabler.ttf" />
   </ItemGroup>
 
 </Project>

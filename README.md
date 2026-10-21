@@ -229,9 +229,29 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 - **Уведомления** — daemon уведомлений → центр уведомлений Windows
 - **Сеть** — NetworkManager → счётчики интерфейсов Windows
 
+## Иконки
+
+Иконки — **один в один с оригиналом**: в exe встроен тот же шрифт Tabler
+(`assets/fonts/noctalia-tabler.ttf` из репозитория Noctalia), а имена иконок берутся из
+`tabler.json` и таблицы алиасов `src/render/text/glyph_registry.cpp`. Поэтому в коде панели
+иконки задаются **по имени**, как в оригинале:
+
+```csharp
+MakeGlyph("battery-4");      // батарея
+MakeGlyph("volume-high");    // громкость (volume, через алиас)
+MakeGlyph("media-play");     // play (player-play-filled, через алиас)
+```
+
+Алиасы (`volume-high` → `volume`, `shutdown` → `power`, `caffeine-on` → `mug-filled`,
+`brightness-high` → `brightness-up-filled` и т. д.) перенесены из оригинала дословно.
+Динамические иконки повторяют логику оригинала: батарея по порогам 85/55/30/10,
+громкость по порогам 40 % (`audioVolumeGlyph`), Wi-Fi по уровню сигнала, статус
+воспроизведения в медиа-виджете.
+
 ## Идеи для развития
 
 - [x] Медиа-виджет через `GlobalSystemMediaTransportControls` (трек, play/pause, обложка)
+- [x] Иконки Tabler как в оригинале (встроенный шрифт `noctalia-tabler.ttf`)
 - [ ] Виджет погоды
 - [ ] Иконки Tabler как в оригинале (встроить шрифт)
 - [ ] Мультимониторность (сейчас панель на основном экране)
@@ -244,8 +264,10 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
   `SetWindowRgn` + `CombineRgn` (скругления и вогнутые углы), `SystemParametersInfo`
   (резерв рабочей области), `GetCursorPos` (авто-скрытие)
 - COM: виртуальные рабочие столы, Core Audio API (громкость)
+- WinRT: `GlobalSystemMediaTransportControls` (медиа), `Fonts.GetFontFamilies` (шрифт иконок)
 - WMI: яркость монитора
+- Шрифт иконок Tabler (`noctalia-tabler.ttf`, лицензия MIT) — из репозитория Noctalia
 
 ## Лицензия
 
-MIT
+MIT. Шрифт иконок Tabler — MIT (см. `Assets/`)

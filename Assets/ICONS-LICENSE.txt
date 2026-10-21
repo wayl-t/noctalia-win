@@ -1,0 +1,5 @@
+Иконки Tabler (assets/fonts/noctalia-tabler.ttf, assets/fonts/tabler.json)
+взяты из проекта Noctalia (https://github.com/noctalia-dev/noctalia),
+который распространяет их по лицензии MIT.
+
+Оригинальный шрифт: Tabler Icons (https://tabler.io/icons), лицензия MIT.

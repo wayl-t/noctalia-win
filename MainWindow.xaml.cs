@@ -156,7 +156,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void BuildWidgets()
     {
         // --- start ---
-        _launcherButton = MakeIconButton("Р›Р°СѓРЅС‡РµСЂ", "\uE71D", Launcher_Click);
+        _launcherButton = MakeIconButton("Р›Р°СѓРЅС‡РµСЂ", "search", Launcher_Click);
 
         _workspacesPanel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         _workspacesWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = _workspacesPanel };
@@ -179,7 +179,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _clockButton.Content = clockRow;
 
         // --- end ---
-        _mediaIcon = MakeGlyph("");
+        _mediaIcon = MakeGlyph("disc");
         _mediaText = new TextBlock { Style = (Style)FindResource("DimText"), Margin = new Thickness(6, 0, 0, 0), FontSize = 12, MaxWidth = 190 };
         var mediaRow = new StackPanel { Orientation = Orientation.Horizontal };
         mediaRow.Children.Add(_mediaIcon);
@@ -200,7 +200,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             e.Handled = true;
         };
 
-        _notifIcon = MakeGlyph("\uE7ED");
+        _notifIcon = MakeGlyph("bell");
         _notifWidget = new Border
         {
             Style = (Style)FindResource("WidgetBorder"),
@@ -208,16 +208,16 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         };
         _notifWidget.MouseLeftButtonDown += (_, _) => Notifications_Click();
 
-        _trayButton = MakeIconButton("РЎРёСЃС‚РµРјРЅС‹Р№ С‚СЂРµР№", "\uE71D", (_, _) => OpenTrayFallback());
+        _trayButton = MakeIconButton("РЎРёСЃС‚РµРјРЅС‹Р№ С‚СЂРµР№", "search", (_, _) => OpenTrayFallback());
         _trayButton.Visibility = Visibility.Collapsed; // С‚СЂРµР№ РІ Windows вЂ” С‡РµСЂРµР· СЃРІРѕСЋ РёРєРѕРЅРєСѓ
 
-        _netIcon = MakeGlyph("\uE774");
+        _netIcon = MakeGlyph("wifi");
         _netText = new TextBlock { Style = (Style)FindResource("DimText"), Margin = new Thickness(5, 0, 0, 0), FontSize = 12 };
         var netRow = new StackPanel { Orientation = Orientation.Horizontal };
         netRow.Children.Add(_netIcon);
         netRow.Children.Add(_netText);
         _netWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = netRow, ToolTip = "РЎРµС‚СЊ" };
-        _volumeIcon = MakeGlyph("\uE767");
+        _volumeIcon = MakeGlyph("volume-high");
         _volumeText = new TextBlock { Style = (Style)FindResource("BarText"), Margin = new Thickness(5, 0, 0, 0), FontSize = 12 };
         _volumeButton = new Button { Style = (Style)FindResource("BarButton"), ToolTip = "Р“СЂРѕРјРєРѕСЃС‚СЊ вЂ” РєР»РёРє, РїСЂРѕРєСЂСѓС‚РєР° вЂ” СЂРµРіСѓР»РёСЂРѕРІРєР°" };
         var volRow = new StackPanel { Orientation = Orientation.Horizontal };
@@ -227,15 +227,15 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _volumeButton.Click += Volume_Click;
         _volumeButton.MouseWheel += Volume_Scroll;
 
-        _batteryIcon = MakeGlyph("\uE850");
+        _batteryIcon = MakeGlyph("battery-4");
         _batteryText = new TextBlock { Style = (Style)FindResource("BarText"), Margin = new Thickness(4, 0, 0, 0), FontSize = 12 };
         var batRow = new StackPanel { Orientation = Orientation.Horizontal };
         batRow.Children.Add(_batteryIcon);
         batRow.Children.Add(_batteryText);
         _batteryWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = batRow, ToolTip = "Р‘Р°С‚Р°СЂРµСЏ", Visibility = Visibility.Collapsed };
 
-        _controlCenterButton = MakeIconButton("Р‘С‹СЃС‚СЂС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё", "\uE713", QuickSettings_Click);
-        _sessionButton = MakeIconButton("РџРёС‚Р°РЅРёРµ", "\uE7E8", Session_Click);
+        _controlCenterButton = MakeIconButton("Р‘С‹СЃС‚СЂС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё", "settings", QuickSettings_Click);
+        _sessionButton = MakeIconButton("РџРёС‚Р°РЅРёРµ", "shutdown", Session_Click);
 
         // --- РїРѕРєР°Р·Р°С‚РµР»Рё СЂРµСЃСѓСЂСЃРѕРІ (РЅРµ РІ РґРµС„РѕР»С‚РЅРѕРј РЅР°Р±РѕСЂРµ РѕСЂРёРіРёРЅР°Р»Р°, РѕСЃС‚Р°РІР»РµРЅС‹ РѕРїС†РёРµР№) ---
         _cpuText = new TextBlock { Style = (Style)FindResource("DimText"), FontSize = 12 };
@@ -261,20 +261,21 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         Reg("stats", _statsWidget);
     }
 
-    private TextBlock MakeGlyph(string glyph)
+    /// <summary>Иконка по имени Tabler, как в оригинале (<c>IconGlyphs.Glyph("volume-high")</c>).</summary>
+    private TextBlock MakeGlyph(string iconName)
     {
         var tb = new TextBlock
         {
             Style = (Style)FindResource("BarIcon"),
-            Text = glyph,
+            Text = IconGlyphs.Glyph(iconName),
         };
         ApplyIconFont(tb);
         return tb;
     }
 
-    private Button MakeIconButton(string tip, string glyph, RoutedEventHandler onClick)
+    private Button MakeIconButton(string tip, string iconName, RoutedEventHandler onClick)
     {
-        var tb = new TextBlock { Style = (Style)FindResource("BarIcon"), Text = glyph };
+        var tb = new TextBlock { Style = (Style)FindResource("BarIcon"), Text = IconGlyphs.Glyph(iconName) };
         ApplyIconFont(tb);
         var btn = new Button
         {
@@ -286,26 +287,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return btn;
     }
 
-    /// <summary>РЁСЂРёС„С‚ РёРєРѕРЅРѕРє Tabler, РµСЃР»Рё РѕРЅ РµСЃС‚СЊ; РёРЅР°С‡Рµ СЃРёСЃС‚РµРјРЅС‹Рµ РіР»РёС„С‹ Segoe MDL2.</summary>
-    private void ApplyIconFont(TextBlock tb)
+    /// <summary>Шрифт иконок: встроенный Tabler (как в оригинале), иначе системный запасной.</summary>
+    private static void ApplyIconFont(TextBlock tb)
     {
-        // Tabler РёРґС‘С‚ РІ РєРѕРјРїР»РµРєС‚Рµ РѕСЂРёРіРёРЅР°Р»Р°; РІ РЅР°С€РµР№ СЃР±РѕСЂРєРµ Р±РµСЂС‘Рј Tabler, РµСЃР»Рё
-        // РѕРЅ СѓСЃС‚Р°РЅРѕРІР»РµРЅ, Р° РёРЅР°С‡Рµ РѕСЃС‚Р°РІР»СЏРµРј Segoe MDL2 Assets (РіР»РёС„С‹ СЃРѕРІРїР°РґР°СЋС‚).
-        var tabler = new FontFamily("Tabler Icons");
-        tb.FontFamily = _hasTabler ? tabler : new FontFamily("Segoe MDL2 Assets");
+        tb.FontFamily = IconGlyphs.Family;
     }
 
-    private static readonly bool _hasTabler = HasFont("Tabler Icons");
-
-    private static bool HasFont(string family)
+    /// <summary>Сменить символ у иконки по имени Tabler.</summary>
+    private static void SetGlyph(TextBlock tb, string iconName)
     {
-        try
-        {
-            foreach (var f in Fonts.SystemFontFamilies)
-                if (string.Equals(f.Source, family, System.StringComparison.OrdinalIgnoreCase)) return true;
-        }
-        catch { }
-        return false;
+        if (tb == null) return;
+        tb.Text = IconGlyphs.Glyph(iconName);
     }
 
     // ================= Lifecycle =================
@@ -1297,7 +1289,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (_stats.HasBattery)
         {
             _batteryWidget.Visibility = Visibility.Visible;
-            _batteryIcon.Text = _stats.Charging ? "\uE898" : BatteryGlyph(_stats.BatteryPercent);
+            _batteryIcon.Text = IconGlyphs.Glyph(_stats.Charging ? "battery-charging" : BatteryGlyphName(_stats.BatteryPercent));
             _batteryText.Text = $"{_stats.BatteryPercent}%";
             _batteryIcon.Foreground = _stats.BatteryPercent <= 20 && !_stats.Charging
                 ? Freeze(ParseColor(_palette.Error))
@@ -1311,16 +1303,24 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         UpdateVolumeUI();
     }
 
-    private static string BatteryGlyph(int percent) => percent switch
+    private static string BatteryGlyphName(int percent) => percent switch
     {
-        >= 90 => "\uE850",
-        >= 75 => "\uE851",
-        >= 60 => "\uE852",
-        >= 45 => "\uE853",
-        >= 30 => "\uE854",
-        >= 15 => "\uE855",
-        _     => "\uE859",
+        >= 85 => "battery-4",
+        >= 55 => "battery-3",
+        >= 30 => "battery-2",
+        >= 10 => "battery-1",
+        _     => "battery-0",
     };
+
+    /// <summary>
+    /// Имя иконки громкости — один в один с <c>audioVolumeGlyph</c> оригинала:
+    /// mute/0 -> volume-mute, &lt;40% -> volume-low, иначе volume-high.
+    /// </summary>
+    private static string VolumeGlyphName(float volume, bool muted)
+    {
+        if (muted || volume <= 0f) return "volume-mute";
+        return volume < 0.4f ? "volume-low" : "volume-high";
+    }
 
     // ================= РњРµРґРёР° (Р»СѓС‡С€РµРµ РґРѕСЃС‚СѓРїРЅРѕРµ РѕРєРЅРѕ) =================
 
@@ -1363,7 +1363,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         _mediaWidget.Visibility = Visibility.Visible;
         // play/pause иконка, как в оригинале (media widget показывает статус воспроизведения)
-        _mediaIcon.Text = _media.IsPlaying ? "\uE769" : "\uE768";
+        _mediaIcon.Text = IconGlyphs.Glyph(_media.IsPlaying ? "media-pause" : "media-play");
         _mediaText.Text = string.IsNullOrWhiteSpace(_media.Artist)
             ? _media.Title
             : $"{_media.Title} — {_media.Artist}";
@@ -1378,14 +1378,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (!_audio.IsAvailable)
         {
             _volumeText.Text = "";
-            _volumeIcon.Text = "\uE74F";
+            _volumeIcon.Text = IconGlyphs.Glyph("volume-mute");
             return;
         }
 
         bool muted = _audio.GetMute();
         float vol = _audio.GetVolume();
 
-        _volumeIcon.Text = muted || vol <= 0f ? "\uE74F" : (vol < 0.34f ? "\uE992" : vol < 0.67f ? "\uE993" : "\uE767");
+        _volumeIcon.Text = IconGlyphs.Glyph(VolumeGlyphName(vol, muted));
         _volumeText.Text = muted ? "вЂ”" : $"{(int)(vol * 100)}%";
 
         if (_volumePopup != null && _volumePopup.IsOpen &&

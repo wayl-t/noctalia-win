@@ -46,18 +46,18 @@ public sealed class ControlCenterWindow : Window
     // Вкладки оригинала (kTabs в control_center_panel.h, порядок как в TabId).
     private static readonly (string Key, string Title, string Glyph)[] Tabs =
     {
-        ("home", "Главная", "\uE80F"),
-        ("media", "Медиа", "\uE8D6"),
-        ("audio", "Звук", "\uE767"),
-        ("monitor", "Экран", "\uE7F4"),
-        ("system", "Система", "\uE9D9"),
-        ("power", "Питание", "\uE83E"),
-        ("network", "Сеть", "\uE701"),
-        ("bluetooth", "Bluetooth", "\uE702"),
-        ("weather", "Погода", "\uE9BD"),
-        ("calendar", "Календарь", "\uE787"),
-        ("notifications", "Уведомления", "\uEA8F"),
-        ("screen-time", "Экранное время", "\uE823"),
+        ("home", "Главная", "home"),
+        ("media", "Медиа", "disc"),
+        ("audio", "Звук", "volume-high"),
+        ("monitor", "Экран", "brightness-high"),
+        ("system", "Система", "cpu"),
+        ("power", "Питание", "shutdown"),
+        ("network", "Сеть", "wifi"),
+        ("bluetooth", "Bluetooth", "bluetooth"),
+        ("weather", "Погода", "cloud"),
+        ("calendar", "Календарь", "calendar"),
+        ("notifications", "Уведомления", "bell"),
+        ("screen-time", "Экранное время", "hourglass"),
     };
 
     private readonly SystemStatsService _stats;
@@ -263,9 +263,9 @@ public sealed class ControlCenterWindow : Window
 
         _headerActions = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
         if (cc.ShowSessionButton)
-            _headerActions.Children.Add(HeaderIconButton("\uE7E8", "Питание", ShowSessionActions));
-        _headerActions.Children.Add(HeaderIconButton("\uE713", "Настройки", () => { Close(); OpenSettingsRequested?.Invoke(); }));
-        _headerActions.Children.Add(HeaderIconButton("\uE711", "Закрыть", Close));
+            _headerActions.Children.Add(HeaderIconButton("shutdown", "Питание", ShowSessionActions));
+        _headerActions.Children.Add(HeaderIconButton("settings", "Настройки", () => { Close(); OpenSettingsRequested?.Invoke(); }));
+        _headerActions.Children.Add(HeaderIconButton("close", "Закрыть", Close));
         header.Children.Add(Place(_headerActions, 1));
 
         col.Children.Add(Place(header, 0, 0));
@@ -321,11 +321,12 @@ public sealed class ControlCenterWindow : Window
         return t;
     }
 
-    private TextBlock Glyph(string glyph, double size, Brush color)
+    /// <summary>Иконка по имени Tabler (как в оригинале), с размером и цветом.</summary>
+    private TextBlock Glyph(string iconName, double size, Brush color)
     {
         var tb = new TextBlock
         {
-            Text = glyph,
+            Text = IconGlyphs.Glyph(iconName),
             FontSize = size,
             Foreground = B(color, "#FFf3edf7"),
             VerticalAlignment = VerticalAlignment.Center,
@@ -457,7 +458,7 @@ public sealed class ControlCenterWindow : Window
         info.Children.Add(Line(Environment.UserName, FontSizeTitle * 1.12, _onSurface, FontWeights.Bold));
         info.Children.Add(Line($"{Environment.UserName}@{Environment.MachineName}", FontSizeCaption, _onSurfaceVariant));
         info.Children.Add(Line($"В работе {Uptime()}", FontSizeCaption, _onSurfaceVariant));
-        info.Children.Add(Line("NoctaliaWin 0.4.1", FontSizeCaption, _onSurfaceVariant));
+        info.Children.Add(Line("NoctaliaWin 0.4.2", FontSizeCaption, _onSurfaceVariant));
         dock.Children.Add(Place(info, 2));
 
         card.Child = dock;
@@ -509,7 +510,7 @@ public sealed class ControlCenterWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
         };
         var artImage = ArtworkImage(art);
-        artBox.Child = artImage ?? (UIElement)Glyph("\uE8D6", art * 0.55, _onSurfaceVariant);
+        artBox.Child = artImage ?? (UIElement)Glyph("disc", art * 0.55, _onSurfaceVariant);
         row.Children.Add(Place(artBox, 0));
 
         bool available = _media?.Available == true;
@@ -603,7 +604,7 @@ public sealed class ControlCenterWindow : Window
             Foreground = B(_onSurface, "#FFf3edf7"),
         });
         var weatherRow = new StackPanel { Orientation = Orientation.Horizontal };
-        weatherRow.Children.Add(Glyph("\uE9BD", FontSizeCaption * 1.12, _primary));
+        weatherRow.Children.Add(Glyph("cloud", FontSizeCaption * 1.12, _primary));
         weatherRow.Children.Add(new TextBlock
         {
             Text = "погода недоступна",
@@ -683,16 +684,16 @@ public sealed class ControlCenterWindow : Window
     /// power_profile (+ wallpaper, screen_recorder, session).</summary>
     private (string Label, string Glyph, Action Action) ShortcutFor(string type) => type switch
     {
-        "wifi" => ("Wi-Fi", "\uE701", () => { Close(); NativeMethods.OpenNetworkFlyout(); }),
-        "bluetooth" => ("Bluetooth", "\uE702", () => { Close(); NativeMethods.OpenBluetoothSettings(); }),
-        "caffeine" => ("Не гасить", "\uE8EF", ToggleCaffeine),
-        "nightlight" => ("Ночной свет", "\uE9BD", () => { Close(); NativeMethods.OpenDisplaySettings(); }),
-        "notification" => ("Уведомления", "\uEA8F", () => SelectTab("notifications")),
-        "power_profile" => ("Питание", "\uE83E", () => SelectTab("power")),
-        "wallpaper" => ("Обои", "\uE91B", () => { Close(); NativeMethods.OpenPersonalizationSettings(); }),
-        "screen_recorder" => ("Запись экрана", "\uE7C8", () => { Close(); NativeMethods.OpenSnippingTool(); }),
-        "session" => ("Сеанс", "\uE7E8", ShowSessionActions),
-        _ => (type, "\uE783", () => { }),
+        "wifi" => ("Wi-Fi", "wifi", () => { Close(); NativeMethods.OpenNetworkFlyout(); }),
+        "bluetooth" => ("Bluetooth", "bluetooth", () => { Close(); NativeMethods.OpenBluetoothSettings(); }),
+        "caffeine" => ("Не гасить", "caffeine-off", ToggleCaffeine),
+        "nightlight" => ("Ночной свет", "nightlight-off", () => { Close(); NativeMethods.OpenDisplaySettings(); }),
+        "notification" => ("Уведомления", "bell", () => SelectTab("notifications")),
+        "power_profile" => ("Питание", "shutdown", () => SelectTab("power")),
+        "wallpaper" => ("Обои", "wallpaper-selector", () => { Close(); NativeMethods.OpenPersonalizationSettings(); }),
+        "screen_recorder" => ("Запись экрана", "camera", () => { Close(); NativeMethods.OpenSnippingTool(); }),
+        "session" => ("Сеанс", "shutdown", ShowSessionActions),
+        _ => (type, "circle-dot", () => { }),
     };
 
     private void ToggleCaffeine()
@@ -796,7 +797,7 @@ public sealed class ControlCenterWindow : Window
             Background = B(_surfaceVariant, "#F911112d"),
             VerticalAlignment = VerticalAlignment.Center,
         };
-        artBox.Child = ArtworkImage(art) ?? (UIElement)Glyph("\uE8D6", art * 0.5, _onSurfaceVariant);
+        artBox.Child = ArtworkImage(art) ?? (UIElement)Glyph("disc", art * 0.5, _onSurfaceVariant);
         row.Children.Add(Place(artBox, 0));
 
         var info = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
@@ -979,22 +980,11 @@ public sealed class ControlCenterWindow : Window
     }
 }
 
-/// <summary>Шрифт иконок: Tabler, если установлен, иначе Segoe MDL2 Assets.</summary>
+/// <summary>
+/// Шрифт иконок control center. Использует встроенный Tabler — тот же
+/// <see cref="IconGlyphs.Family"/>, что и панель, чтобы вид совпадал с оригиналом.
+/// </summary>
 internal static class IconFont
 {
-    private static readonly bool HasTabler = Has("Tabler Icons");
-
-    public static void Apply(TextBlock tb) =>
-        tb.FontFamily = HasTabler ? new FontFamily("Tabler Icons") : new FontFamily("Segoe MDL2 Assets");
-
-    private static bool Has(string family)
-    {
-        try
-        {
-            foreach (var f in Fonts.SystemFontFamilies)
-                if (string.Equals(f.Source, family, StringComparison.OrdinalIgnoreCase)) return true;
-        }
-        catch { }
-        return false;
-    }
+    public static void Apply(TextBlock tb) => tb.FontFamily = IconGlyphs.Family;
 }
