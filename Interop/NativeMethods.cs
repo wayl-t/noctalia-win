@@ -43,12 +43,15 @@ internal static class NativeMethods
     [DllImport("user32.dll")]
     internal static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WINDOWCOMPOSITIONATTRIBDATA data);
 
-    /// <summary>Включает Acrylic-фон окна. color — цвет подложки в формате 0xAARRGGBB (упакуется в ABGR).</summary>
-    internal static void EnableAcrylic(IntPtr hwnd, uint argbTint)
+    /// <summary>Включает Acrylic-фон окна. color — цвет подложки в формате 0xAARRGGBB (упакуется в ABGR).
+    /// enable=false выключает размытие (плоская подложка окна).</summary>
+    internal static void EnableAcrylic(IntPtr hwnd, uint argbTint, bool enable = true)
     {
         var accent = new ACCENT_POLICY
         {
-            AccentState = (int)ACCENT_STATE.ACCENT_ENABLE_ACRYLICBLURBEHIND,
+            AccentState = enable
+                ? (int)ACCENT_STATE.ACCENT_ENABLE_ACRYLICBLURBEHIND
+                : (int)ACCENT_STATE.ACCENT_DISABLED,
             AccentFlags = 2,
             // GradientColor в формате ABGR: A | B | G | R
             GradientColor = (argbTint & 0xFF000000)
@@ -106,7 +109,19 @@ internal static class NativeMethods
     internal const int WM_MOUSEACTIVATE = 0x0021;
     internal const int MA_NOACTIVATE = 3;
     internal const int WM_DISPLAYCHANGE = 0x007E;
+    internal const int WM_SETTINGCHANGE = 0x001A;
     internal const int WM_HOTKEY = 0x0312;
+
+    // ---------- Позиция курсора (для авто-скрытия) ----------
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct POINT
+    {
+        public int X, Y;
+    }
+
+    [DllImport("user32.dll")]
+    internal static extern bool GetCursorPos(out POINT lpPoint);
 
     // ---------- Рабочая область (чтобы окна не залезали под панель) ----------
 
@@ -126,6 +141,24 @@ internal static class NativeMethods
     internal const uint SPI_SETWORKAREA = 0x002F;
     internal const uint SPIF_UPDATEINIFILE = 0x01;
     internal const uint SPIF_SENDCHANGE = 0x02;
+
+    // ---------- Позиция системной панели задач (её полосу не трогаем) ----------
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct APPBARDATA
+    {
+        public int cbSize;
+        public IntPtr hWnd;
+        public uint uCallbackMessage;
+        public uint uEdge;
+        public RECT rc;
+        public IntPtr lParam;
+    }
+
+    internal const uint ABM_GETTASKBARPOS = 0x00000005;
+
+    [DllImport("shell32.dll", CallingConvention = CallingConvention.StdCall)]
+    internal static extern IntPtr SHAppBarMessage(uint dwMessage, ref APPBARDATA pData);
 
     // ---------- Активное окно ----------
 
@@ -176,6 +209,7 @@ internal static class NativeMethods
     internal const uint MOD_SHIFT = 0x0004;
     internal const uint MOD_WIN = 0x0008;
     internal const uint VK_SPACE = 0x20;
+    internal const uint VK_S = 0x53;
 
     // ---------- Монитор / DPI ----------
 

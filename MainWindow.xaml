@@ -8,7 +8,8 @@
         ShowInTaskbar="False"
         Topmost="True"
         Background="Transparent"
-        Height="60"
+        Height="48"
+        Width="1200"
         Loaded="OnLoaded"
         Closing="OnClosing">
 
@@ -27,6 +28,7 @@
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
 
+        <!-- кнопка на панели; подсветка берётся из палитры темы (HoverBrush) -->
         <Style x:Key="BarButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
@@ -44,15 +46,32 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="#28FFFFFF"/>
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource HoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="#40FFFFFF"/>
+                                <Setter TargetName="bg" Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <!-- обёртка виджета: мягкая подсветка под курсором (как hover_highlight в Noctalia) -->
+        <Style x:Key="WidgetBorder" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="7,3"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource HoverBrush}"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <!-- индикатор рабочего стола -->
@@ -66,34 +85,35 @@
         </Style>
     </Window.Resources>
 
-    <!-- Корневая рамка панели -->
+    <!-- Корневая рамка панели: окно само по размеру полосы, док к краю экрана -->
     <Border x:Name="RootBorder"
             CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=Window}}"
             Background="{Binding BackgroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
-            BorderBrush="#22FFFFFF" BorderThickness="1"
-            Margin="{Binding PanelMargin, RelativeSource={RelativeSource AncestorType=Window}}">
-        <Grid>
+            BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1"
+            Margin="0">
+        <Grid Margin="{Binding BarPadding, RelativeSource={RelativeSource AncestorType=Window}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ЛЕВО: рабочие столы + заголовок окна -->
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="10,0,0,0">
-                <!-- рабочие столы подставляются кодом -->
-                <StackPanel x:Name="WorkspacesPanel" Orientation="Horizontal" Margin="0,0,6,0"/>
+            <!-- Три зоны, как start/center/end в Noctalia: виджеты расставляет ApplyLayout по конфигу -->
+            <StackPanel x:Name="StartPanel" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
 
-                <Border Width="1" Height="18" Background="#33FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
+                <Border x:Name="WorkspacesWidget" Style="{StaticResource WidgetBorder}">
+                    <StackPanel x:Name="WorkspacesPanel" Orientation="Horizontal"/>
+                </Border>
 
-                <TextBlock x:Name="WindowTitleText" Style="{StaticResource DimText}"
-                           MaxWidth="320" Margin="6,0,0,0"
-                           ToolTip="Активное окно"/>
+                <Border x:Name="TitleWidget" Style="{StaticResource WidgetBorder}" ToolTip="Активное окно">
+                    <TextBlock x:Name="WindowTitleText" Style="{StaticResource DimText}" MaxWidth="320"/>
+                </Border>
             </StackPanel>
 
-            <!-- ЦЕНТР: часы -->
-            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button x:Name="ClockButton" Style="{StaticResource BarButton}" Click="Clock_Click">
+            <StackPanel x:Name="CenterPanel" Grid.Column="1" Orientation="Horizontal"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="ClockButton" Style="{StaticResource BarButton}" Click="Clock_Click"
+                        ToolTip="Календарь">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock x:Name="TimeText" Style="{StaticResource BarText}" FontWeight="SemiBold"/>
                         <TextBlock x:Name="DateText" Style="{StaticResource DimText}" Margin="8,0,0,0"/>
@@ -101,20 +121,23 @@
                 </Button>
             </StackPanel>
 
-            <!-- ПРАВО: статистика, батарея, громкость, настройки -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,8,0">
+            <StackPanel x:Name="EndPanel" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
 
-                <TextBlock x:Name="CpuText" Style="{StaticResource DimText}" Margin="0,0,10,0"
-                           ToolTip="Загрузка CPU"/>
-                <TextBlock x:Name="RamText" Style="{StaticResource DimText}" Margin="0,0,10,0"
-                           ToolTip="Оперативная память"/>
+                <Border x:Name="StatsWidget" Style="{StaticResource WidgetBorder}" ToolTip="Ресурсы системы">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="CpuText" Style="{StaticResource DimText}"/>
+                        <TextBlock x:Name="RamText" Style="{StaticResource DimText}" Margin="8,0,0,0"/>
+                    </StackPanel>
+                </Border>
 
-                <StackPanel x:Name="BatteryBadge" Orientation="Horizontal" Margin="0,0,6,0"
-                            Visibility="Collapsed" VerticalAlignment="Center">
-                    <TextBlock x:Name="BatteryIcon" FontFamily="Segoe MDL2 Assets" FontSize="14"
-                               Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
-                    <TextBlock x:Name="BatteryText" Style="{StaticResource BarText}" Margin="4,0,0,0" FontSize="12"/>
-                </StackPanel>
+                <Border x:Name="BatteryWidget" Style="{StaticResource WidgetBorder}" ToolTip="Батарея"
+                        Visibility="Collapsed">
+                    <StackPanel x:Name="BatteryBadge" Orientation="Horizontal">
+                        <TextBlock x:Name="BatteryIcon" FontFamily="Segoe MDL2 Assets" FontSize="15"
+                                   Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="BatteryText" Style="{StaticResource BarText}" Margin="4,0,0,0" FontSize="12"/>
+                    </StackPanel>
+                </Border>
 
                 <Button x:Name="VolumeButton" Style="{StaticResource BarButton}" Click="Volume_Click"
                         ToolTip="Громкость — клик, прокрутка — регулировка"

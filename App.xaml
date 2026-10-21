@@ -3,12 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <SolidColorBrush x:Key="BaseBrush"    Color="#FF1E1E2E"/>
-            <SolidColorBrush x:Key="OverlayBrush" Color="#FF313244"/>
-            <SolidColorBrush x:Key="TextBrush"    Color="#FFCDD6F4"/>
-            <SolidColorBrush x:Key="DimBrush"     Color="#FFA6ADC8"/>
-            <SolidColorBrush x:Key="AccentBrush"  Color="#FFCBA6F7"/>
-            <SolidColorBrush x:Key="HoverBrush"   Color="#33FFFFFF"/>
+            <!-- дефолтные значения палитры; ApplyConfig заменяет их на цвета из конфига -->
+            <SolidColorBrush x:Key="TextColor"    Color="#FFF2F2F7"/>
+            <SolidColorBrush x:Key="DimColor"     Color="#FF9A9AA8"/>
+            <SolidColorBrush x:Key="SurfaceBrush" Color="#F21A1B26"/>
+            <SolidColorBrush x:Key="OutlineBrush" Color="#33FFFFFF"/>
+            <SolidColorBrush x:Key="HoverBrush"   Color="#28FFFFFF"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

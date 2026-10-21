@@ -1,0 +1,336 @@
+<Window x:Class="NoctaliaWin.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Настройки — NoctaliaWin"
+        Width="580" Height="720"
+        WindowStartupLocation="CenterScreen"
+        Background="#FF14151E">
+
+    <Window.Resources>
+        <Style x:Key="Section" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFB4BEFE"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,18,0,6"/>
+        </Style>
+        <Style x:Key="RowLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFC8C8D8"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="ValueLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FFB4BEFE"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="Width" Value="46"/>
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#FF7A7B90"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+        </Style>
+        <Style x:Key="Check" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#FFE8E8F2"/>
+            <Setter Property="Margin" Value="0,4,0,4"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="Radio" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#FFE8E8F2"/>
+            <Setter Property="Margin" Value="0,0,16,0"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="Box" TargetType="TextBox">
+            <Setter Property="Background" Value="#FF1E1F2E"/>
+            <Setter Property="Foreground" Value="#FFE8E8F2"/>
+            <Setter Property="BorderBrush" Value="#FF3A3B52"/>
+            <Setter Property="CaretBrush" Value="#FFE8E8F2"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="#FFB4BEFE"/>
+            <Setter Property="Foreground" Value="#FF1A1B26"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="16,7"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="8"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bg" Property="Opacity" Value="0.65"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PlainButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+            <Setter Property="Background" Value="#FF2A2B40"/>
+            <Setter Property="Foreground" Value="#FFE8E8F2"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+        </Style>
+    </Window.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="18,12,18,18">
+
+            <TextBlock Text="Панель" Style="{StaticResource Section}"/>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Позиция" Style="{StaticResource RowLabel}"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <RadioButton x:Name="PosTop" Content="Сверху (top)" Style="{StaticResource Radio}" IsChecked="True"/>
+                    <RadioButton x:Name="PosBottom" Content="Снизу (bottom)" Style="{StaticResource Radio}"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="46"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Высота" Style="{StaticResource RowLabel}"/>
+                <Slider x:Name="ThicknessSlider" Grid.Column="1" Minimum="24" Maximum="72" Value="48"
+                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="ThicknessVal" Grid.Column="2" Style="{StaticResource ValueLabel}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="46"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Отступ от краёв" Style="{StaticResource RowLabel}"/>
+                <Slider x:Name="MarginEndsSlider" Grid.Column="1" Minimum="0" Maximum="300" Value="100"
+                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="MarginEndsVal" Grid.Column="2" Style="{StaticResource ValueLabel}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="46"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Отступ от экрана" Style="{StaticResource RowLabel}"/>
+                <Slider x:Name="MarginEdgeSlider" Grid.Column="1" Minimum="0" Maximum="60" Value="0"
+                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="MarginEdgeVal" Grid.Column="2" Style="{StaticResource ValueLabel}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="46"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Скругление углов" Style="{StaticResource RowLabel}"/>
+                <Slider x:Name="RadiusSlider" Grid.Column="1" Minimum="0" Maximum="24" Value="14"
+                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="RadiusVal" Grid.Column="2" Style="{StaticResource ValueLabel}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="46"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Внутренний отступ" Style="{StaticResource RowLabel}"/>
+                <Slider x:Name="PaddingSlider" Grid.Column="1" Minimum="0" Maximum="40" Value="14"
+                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="PaddingVal" Grid.Column="2" Style="{StaticResource ValueLabel}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="46"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Зазор между виджетами" Style="{StaticResource RowLabel}"/>
+                <Slider x:Name="SpacingSlider" Grid.Column="1" Minimum="0" Maximum="20" Value="6"
+                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="SpacingVal" Grid.Column="2" Style="{StaticResource ValueLabel}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="46"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Прозрачность фона" Style="{StaticResource RowLabel}"/>
+                <Slider x:Name="OpacitySlider" Grid.Column="1" Minimum="0.2" Maximum="1" Value="1"
+                        TickFrequency="0.05" IsSnapToTickEnabled="True"
+                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="OpacityVal" Grid.Column="2" Style="{StaticResource ValueLabel}"/>
+            </Grid>
+
+            <CheckBox x:Name="BlurBox" Content="Acrylic-размытие под панелью" Style="{StaticResource Check}" IsChecked="True"/>
+            <CheckBox x:Name="ReserveBox" Content="Не пускать окна под панель (резерв области)" Style="{StaticResource Check}" IsChecked="True"/>
+            <CheckBox x:Name="AutoHideBox" Content="Автоматически прятать панель" Style="{StaticResource Check}"/>
+            <CheckBox x:Name="HoverBox" Content="Подсветка виджетов под курсором" Style="{StaticResource Check}" IsChecked="True"/>
+            <CheckBox x:Name="TipsBox" Content="Всплывающие подсказки" Style="{StaticResource Check}" IsChecked="True"/>
+            <CheckBox x:Name="AnimBox" Content="Анимации" Style="{StaticResource Check}" IsChecked="True"/>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="46"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Задержка автоскрытия, мс" Style="{StaticResource RowLabel}"/>
+                <Slider x:Name="DelaySlider" Grid.Column="1" Minimum="100" Maximum="2000" Value="400"
+                        TickFrequency="50" IsSnapToTickEnabled="True"
+                        VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock x:Name="DelayVal" Grid.Column="2" Style="{StaticResource ValueLabel}"/>
+            </Grid>
+
+            <TextBlock Text="Тема" Style="{StaticResource Section}"/>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Режим" Style="{StaticResource RowLabel}"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <RadioButton x:Name="ThemeDark" Content="Тёмная" Style="{StaticResource Radio}" IsChecked="True"/>
+                    <RadioButton x:Name="ThemeLight" Content="Светлая" Style="{StaticResource Radio}"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Фон панели" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="BgBox" Grid.Column="1" Style="{StaticResource Box}" Margin="0,0,0,0"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Фон popup'ов" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="SurfaceBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Текст" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="OnSurfaceBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Приглушённый текст" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="DimBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Акцент" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="PrimaryBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Обводки" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="OutlineBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+            <TextBlock Text="HEX-цвета в формате #AARRGGBB. Пустое поле = дефолт выбранной темы."
+                       Style="{StaticResource Hint}"/>
+
+            <TextBlock Text="Часы" Style="{StaticResource Section}"/>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Формат времени" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="TimeFmtBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Формат даты" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="DateFmtBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+
+            <TextBlock Text="Виджеты" Style="{StaticResource Section}"/>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Слева (start)" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="StartBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="По центру (center)" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="CenterBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+
+            <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="190"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Справа (end)" Style="{StaticResource RowLabel}"/>
+                <TextBox x:Name="EndBox" Grid.Column="1" Style="{StaticResource Box}"/>
+            </Grid>
+            <TextBlock Text="Доступные виджеты: workspaces, title, clock, stats, battery, volume, settings. Перечисляйте через запятую."
+                       Style="{StaticResource Hint}"/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,22,0,0">
+                <Button x:Name="SaveBtn" Content="Сохранить и применить" Style="{StaticResource PrimaryButton}"
+                        Click="Save_Click"/>
+                <Button x:Name="OpenCfgBtn" Content="Папка конфига" Style="{StaticResource PlainButton}"
+                        Margin="10,0,0,0" Click="OpenCfg_Click"/>
+            </StackPanel>
+            <TextBlock Text="Конфиг перезагружается автоматически — правки JSON подхватываются на лету."
+                       Style="{StaticResource Hint}" Margin="0,8,0,0"/>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

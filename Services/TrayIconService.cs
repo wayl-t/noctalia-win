@@ -28,9 +28,13 @@ public sealed class TrayIconService : IDisposable
     /// <summary>WM_APP-сообщение от трей-иконки.</summary>
     public const int TrayCallbackMessage = 0x8000 + 77;
 
+    public const int CMD_SETTINGS = 1004;
     public const int CMD_OPEN_CONFIG = 1001;
     public const int CMD_RELOAD = 1002;
     public const int CMD_EXIT = 1003;
+
+    /// <summary>Запрос на открытие окна настройки (из меню трей).</summary>
+    public Action SettingsRequested;
 
     private IntPtr _hwnd;
     private bool _added;
@@ -76,7 +80,8 @@ public sealed class TrayIconService : IDisposable
         IntPtr menu = CreatePopupMenu();
         if (menu == IntPtr.Zero) return;
 
-        AppendMenu(menu, MF_STRING, (UIntPtr)CMD_OPEN_CONFIG, "Настройки (папка конфига)");
+        AppendMenu(menu, MF_STRING, (UIntPtr)CMD_SETTINGS, "Настройки...");
+        AppendMenu(menu, MF_STRING, (UIntPtr)CMD_OPEN_CONFIG, "Папка конфига");
         AppendMenu(menu, MF_STRING, (UIntPtr)CMD_RELOAD, "Перезагрузить конфиг");
         AppendMenu(menu, MF_SEPARATOR, UIntPtr.Zero, null);
         AppendMenu(menu, MF_STRING, (UIntPtr)CMD_EXIT, "Выход");
@@ -91,6 +96,7 @@ public sealed class TrayIconService : IDisposable
 
         switch (cmd)
         {
+            case CMD_SETTINGS: SettingsRequested?.Invoke(); break;
             case CMD_OPEN_CONFIG: ConfigService.Instance.OpenConfigFolder(); break;
             case CMD_RELOAD: ConfigService.Instance.Reload(); break;
             case CMD_EXIT:
