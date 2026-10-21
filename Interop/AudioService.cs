@@ -24,24 +24,30 @@ internal interface IMMDeviceEnumerator
     int GetDefaultAudioEndpoint(int dataFlow, int role, out IMMDevice endpoint);
 }
 
+// Порядок методов строго по endpointvolume.h (Windows SDK).
+// ВАЖНО: в интерфейсе НЕТ SetAllVolumes/GetAllVolumes, а SetMute идёт ПЕРЕД GetMute —
+// любое расхождение сдвигает vtable-слоты и вызовы попадают в чужие методы (AV в памяти).
 [ComImport, Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
 internal interface IAudioEndpointVolume
 {
-    [PreserveSig] int RegisterControlChangeNotify(IntPtr notify);
-    [PreserveSig] int UnregisterControlChangeNotify(IntPtr notify);
-    [PreserveSig] int GetChannelCount(out uint channelCount);
-    [PreserveSig] int SetMasterVolumeLevel(float level, IntPtr eventContext);
-    [PreserveSig] int SetMasterVolumeLevelScalar(float level, IntPtr eventContext);
-    [PreserveSig] int GetMasterVolumeLevel(out float level);
-    [PreserveSig] int GetMasterVolumeLevelScalar(out float level);
-    [PreserveSig] int SetChannelVolumeLevel(uint channelNum, float level, IntPtr eventContext);
-    [PreserveSig] int SetChannelVolumeLevelScalar(uint channelNum, float level, IntPtr eventContext);
-    [PreserveSig] int GetChannelVolumeLevel(uint channelNum, out float level);
-    [PreserveSig] int GetChannelVolumeLevelScalar(uint channelNum, out float level);
-    [PreserveSig] int SetAllVolumes(IntPtr levels, IntPtr eventContext);
-    [PreserveSig] int GetAllVolumes(IntPtr levels);
-    [PreserveSig] int GetMute(out int mute);
-    [PreserveSig] int SetMute(int mute, IntPtr eventContext);
+    [PreserveSig] int RegisterControlChangeNotify(IntPtr notify);            // 3
+    [PreserveSig] int UnregisterControlChangeNotify(IntPtr notify);          // 4
+    [PreserveSig] int GetChannelCount(out uint channelCount);                // 5
+    [PreserveSig] int SetMasterVolumeLevel(float level, IntPtr eventContext);          // 6
+    [PreserveSig] int SetMasterVolumeLevelScalar(float level, IntPtr eventContext);     // 7
+    [PreserveSig] int GetMasterVolumeLevel(out float level);                 // 8
+    [PreserveSig] int GetMasterVolumeLevelScalar(out float level);           // 9
+    [PreserveSig] int SetChannelVolumeLevel(uint channelNum, float level, IntPtr eventContext);   // 10
+    [PreserveSig] int SetChannelVolumeLevelScalar(uint channelNum, float level, IntPtr eventContext); // 11
+    [PreserveSig] int GetChannelVolumeLevel(uint channelNum, out float level);           // 12
+    [PreserveSig] int GetChannelVolumeLevelScalar(uint channelNum, out float level);     // 13
+    [PreserveSig] int SetMute(int mute, IntPtr eventContext);                // 14
+    [PreserveSig] int GetMute(out int mute);                                 // 15
+    [PreserveSig] int GetVolumeStepInfo(out uint step, out uint stepCount);  // 16
+    [PreserveSig] int VolumeStepUp(IntPtr eventContext);                     // 17
+    [PreserveSig] int VolumeStepDown(IntPtr eventContext);                   // 18
+    [PreserveSig] int QueryHardwareSupport(out uint mask);                   // 19
+    [PreserveSig] int GetVolumeRange(out float minDb, out float maxDb, out float incrementDb); // 20
 }
 
 /// <summary>Управление громкостью системного аудиовыхода.</summary>
@@ -64,10 +70,21 @@ public sealed class AudioService : IDisposable
         {
             _enumerator = (IMMDeviceEnumerator)Activator.CreateInstance(
                 Type.GetTypeFromCLSID(AudioGuids.CLSID_MMDeviceEnumerator));
-            _enumerator.GetDefaultAudioEndpoint(ERender, EConsole, out IMMDevice device);
+            if (_enumerator.GetDefaultAudioEndpoint(ERender, EConsole, out IMMDevice device) != 0
+                || device == null)
+            {
+                _unavailable = true;
+                return null;
+            }
 
             Guid iid = typeof(IAudioEndpointVolume).GUID;
-            device.Activate(ref iid, 23 /*CLSCTX_ALL*/, IntPtr.Zero, out object obj);
+            int hr = device.Activate(ref iid, 23 /*CLSCTX_ALL*/, IntPtr.Zero, out object obj);
+            Marshal.ReleaseComObject(device);
+            if (hr != 0 || obj == null)
+            {
+                _unavailable = true;
+                return null;
+            }
             _volume = (IAudioEndpointVolume)obj;
         }
         catch

@@ -34,7 +34,10 @@ internal static class NativeMethods
     {
         public WINDOWCOMPOSITIONATTRIB Attrib;
         public IntPtr pvData;
-        public int cbData;
+        // В нативном API это SIZE_T (8 байт на x64). Объявлено как nuint,
+        // иначе старшие 4 байта читаются со стека с мусором и Windows
+        // портит память по pbData — отсюда AccessViolation в разных местах.
+        public nuint cbData;
     }
 
     [DllImport("user32.dll")]
@@ -63,7 +66,7 @@ internal static class NativeMethods
             {
                 Attrib = WINDOWCOMPOSITIONATTRIB.WCA_ACCENT_POLICY,
                 pvData = pData,
-                cbData = size,
+                cbData = (nuint)size,
             };
             SetWindowCompositionAttribute(hwnd, ref data);
         }

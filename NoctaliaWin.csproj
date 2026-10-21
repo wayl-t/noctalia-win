@@ -13,7 +13,7 @@
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Product>NoctaliaWin</Product>
     <Description>Нативная панель для Windows в стиле Noctalia</Description>
   </PropertyGroup>
