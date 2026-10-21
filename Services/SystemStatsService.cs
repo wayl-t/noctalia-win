@@ -23,6 +23,15 @@ public sealed class SystemStatsService : IDisposable
     public bool OnAc { get; private set; }
     public bool Charging { get; private set; }
 
+    // Сеть: скорость приёма/передачи, как network_rx/network_tx в Noctalia
+    private long _lastRxBytes = -1, _lastTxBytes = -1;
+    private DateTime _lastNetSampleUtc = DateTime.MinValue;
+    public double NetRxBytesPerSec { get; private set; }
+    public double NetTxBytesPerSec { get; private set; }
+
+    /// <summary>Готовая подпись скорости сети (компактная, как network_speed_compact).</summary>
+    public string NetText { get; private set; } = "";
+
     public SystemStatsService()
     {
         try
@@ -75,6 +84,60 @@ public sealed class SystemStatsService : IDisposable
             OnAc = sps.ACLineStatus == 1;
             Charging = (sps.BatteryFlag & 8) != 0;
         }
+
+        RefreshNetwork();
+    }
+
+    /// <summary>Скорость сети по счётчикам интерфейсов (как network монитор в Noctalia).</summary>
+    private void RefreshNetwork()
+    {
+        try
+        {
+            long rx = 0, tx = 0;
+            foreach (var ni in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up) continue;
+                if (ni.NetworkInterfaceType == System.Net.NetworkInformation.NetworkInterfaceType.Loopback) continue;
+                var stats = ni.GetIPStatistics();
+                rx += stats.BytesReceived;
+                tx += stats.BytesSent;
+            }
+
+            var now = DateTime.UtcNow;
+            if (_lastRxBytes >= 0 && _lastNetSampleUtc != DateTime.MinValue)
+            {
+                double dt = (now - _lastNetSampleUtc).TotalSeconds;
+                if (dt > 0.2)
+                {
+                    double rxRate = Math.Max(0, (rx - _lastRxBytes) / dt);
+                    double txRate = Math.Max(0, (tx - _lastTxBytes) / dt);
+                    // сглаживание, чтобы подпись не дёргалась
+                    NetRxBytesPerSec = NetRxBytesPerSec <= 0 ? rxRate : NetRxBytesPerSec * 0.6 + rxRate * 0.4;
+                    NetTxBytesPerSec = NetTxBytesPerSec <= 0 ? txRate : NetTxBytesPerSec * 0.6 + txRate * 0.4;
+                    NetText = BuildNetText();
+                }
+            }
+
+            _lastRxBytes = rx;
+            _lastTxBytes = tx;
+            _lastNetSampleUtc = now;
+        }
+        catch { /* noop */ }
+    }
+
+    /// <summary>Компактная подпись: "↓1.2M ↑240K" (как network_speed_compact в оригинале).</summary>
+    private string BuildNetText()
+    {
+        // очень маленький поток считаем «тишиной», чтобы виджет не мигал
+        if (NetRxBytesPerSec < 1024 && NetTxBytesPerSec < 1024) return "";
+        return $"\u2193{Fmt(NetRxBytesPerSec)} \u2191{Fmt(NetTxBytesPerSec)}";
+    }
+
+    private static string Fmt(double bytesPerSec)
+    {
+        if (bytesPerSec >= 1024 * 1024) return $"{bytesPerSec / 1024 / 1024:0.#}M";
+        if (bytesPerSec >= 1024) return $"{bytesPerSec / 1024:0}K";
+        return $"{bytesPerSec:0}B";
     }
 
     /// <summary>Яркость 0–100; -1 если недоступно (десктоп без WMI-монитора).</summary>

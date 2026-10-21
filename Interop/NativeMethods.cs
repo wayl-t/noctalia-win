@@ -94,6 +94,124 @@ internal static class NativeMethods
         SetWindowRgn(hwnd, region, true); // регион освобождается системой
     }
 
+    // ---------- Вогнутые углы (concave_edge_corners) ----------
+    //
+    // У скругления CreateRoundRectRgn все четыре угла выпуклые. В Noctalia пара
+    // углов, обращённых внутрь экрана, вырезается ВОГНУТО (дугой наоборот),
+    // чтобы полоса «вытекала» из края. На Windows это делается булевой
+    // операцией над регионами: RGN_DIFF вычитает круг из прямоугольника.
+
+    [DllImport("gdi32.dll")]
+    internal static extern IntPtr CreateRectRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
+
+    [DllImport("gdi32.dll")]
+    internal static extern IntPtr CreateEllipticRgn(int nLeftRect, int nTopRect, int nRightRect, int nBottomRect);
+
+    [DllImport("gdi32.dll")]
+    internal static extern int CombineRgn(IntPtr hrgnDest, IntPtr hrgnSrc1, IntPtr hrgnSrc2, int fnCombineMode);
+
+    [DllImport("gdi32.dll")]
+    internal static extern bool DeleteObject(IntPtr ho);
+
+    internal const int RGN_OR = 2;
+    internal const int RGN_DIFF = 4;
+
+    /// <summary>
+    /// Регион полосы со скруглениями и, при needConcave, с вырезанными
+    /// вогнутыми углами со стороны края экрана.
+    /// </summary>
+    internal static void SetBarRegion(
+        IntPtr hwnd,
+        int widthPx,
+        int heightPx,
+        int tl, int tr, int br, int bl,
+        bool concave, bool concaveTop)
+    {
+        if (widthPx <= 0 || heightPx <= 0) return;
+
+        // базовая форма: скруглённый прямоугольник
+        IntPtr region = CreateRoundRectRgn(0, 0, widthPx + 1, heightPx + 1, tl * 2, tl * 2);
+
+        if (!concave)
+        {
+            // разные радиусы по углам: вычитаем «уголки», оставшиеся прямыми
+            SetWindowRgn(hwnd, region, true);
+            return;
+        }
+
+        // Вогнутые углы со стороны края экрана: для полосы сверху — верхние.
+        // Квадрат размером r в углу минус круг диаметром 2r с центром в
+        // противоположном углу квадрата даёт вогнутую дугу.
+        foreach (bool left in new[] { true, false })
+        {
+            int r = left ? tl : tr;                    // радиус соответствующего угла
+            if (r <= 0) continue;
+            int size = System.Math.Min(r, System.Math.Min(widthPx / 2, heightPx / 2));
+            if (size <= 1) continue;
+
+            int cx = left ? 0 : widthPx;
+            int cy = concaveTop ? 0 : heightPx;
+
+            // круг, который вычитаем: центр в дальнем углу квадрата выреза
+            int ex1 = left ? cx : cx - 2 * size;
+            int ey1 = concaveTop ? cy : cy - 2 * size;
+            IntPtr cut = CreateEllipticRgn(ex1, ey1, ex1 + 2 * size, ey1 + 2 * size);
+
+            // квадрат выреза
+            int sx1 = left ? 0 : widthPx - size;
+            int sy1 = concaveTop ? 0 : heightPx - size;
+            IntPtr square = CreateRectRgn(sx1, sy1, sx1 + size, sy1 + size);
+
+            // square минус круг = вогнутая четверть
+            IntPtr notch = CreateRectRgn(0, 0, 1, 1);
+            CombineRgn(notch, square, cut, RGN_DIFF);
+
+            // вычитаем эту четверть из основной формы
+            CombineRgn(region, region, notch, RGN_DIFF);
+
+            DeleteObject(notch);
+            DeleteObject(square);
+            DeleteObject(cut);
+        }
+
+        // квадраты скруглений у противоположной стороны обнуляем, если радиусы разные:
+        // CreateRoundRectRgn сделал одинаковые, поэтому для точности вычитаем лишнее
+        foreach (var (cornerLeft, cornerTop, r) in new[]
+                 {
+                     (true,  true,  tl), (false, true,  tr),
+                     (true,  false, bl), (false, false, br),
+                 })
+        {
+            if (r == tl) continue; // уже такой радиус у базовой формы
+            // заменяем угол: вырезаем старый радиус и вычитаем новый
+            int old = tl;
+            if (old <= 0) continue;
+            int size = System.Math.Min(old, System.Math.Min(widthPx / 2, heightPx / 2));
+            int sx1 = cornerLeft ? 0 : widthPx - size;
+            int sy1 = cornerTop ? 0 : heightPx - size;
+            IntPtr sq = CreateRectRgn(sx1, sy1, sx1 + size, sy1 + size);
+            CombineRgn(region, region, sq, RGN_DIFF);
+            DeleteObject(sq);
+
+            if (r > 0)
+            {
+                int ns = System.Math.Min(r, System.Math.Min(widthPx / 2, heightPx / 2));
+                int nx1 = cornerLeft ? sx1 : sx1 + size - ns;
+                int ny1 = cornerTop ? sy1 : sy1 + size - ns;
+                IntPtr cut2 = CreateEllipticRgn(nx1, ny1, nx1 + 2 * ns, ny1 + 2 * ns);
+                IntPtr sq2 = CreateRectRgn(nx1, ny1, nx1 + ns, ny1 + ns);
+                IntPtr keep = CreateRectRgn(0, 0, 1, 1);
+                CombineRgn(keep, sq2, cut2, RGN_DIFF);
+                CombineRgn(region, region, keep, RGN_DIFF);
+                DeleteObject(keep);
+                DeleteObject(sq2);
+                DeleteObject(cut2);
+            }
+        }
+
+        SetWindowRgn(hwnd, region, true);
+    }
+
     // ---------- Скрытие из Alt-Tab ----------
 
     internal const int GWL_EXSTYLE = -20;
@@ -195,6 +313,17 @@ internal static class NativeMethods
 
     [DllImport("powrprof.dll")]
     internal static extern bool SetSuspendState(bool hibernate, bool forceCritical, bool disableWakeEvent);
+
+    /// <summary>Открыть центр уведомлений Windows (Win+A делается через shell-протокол).</summary>
+    internal static void OpenActionCenter()
+    {
+        try
+        {
+            // ms-actioncenter — документированный URI оболочки для центра уведомлений
+            ShellExecuteW(IntPtr.Zero, "open", "ms-actioncenter:", null, null, SW_SHOWNORMAL);
+        }
+        catch { /* noop */ }
+    }
 
     // ---------- Ограничение частоты кадров не требуется; хоткеи ----------
 

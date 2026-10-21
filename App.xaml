@@ -3,12 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <!-- дефолтные значения палитры; ApplyConfig заменяет их на цвета из конфига -->
-            <SolidColorBrush x:Key="TextColor"    Color="#FFF2F2F7"/>
-            <SolidColorBrush x:Key="DimColor"     Color="#FF9A9AA8"/>
-            <SolidColorBrush x:Key="SurfaceBrush" Color="#F21A1B26"/>
-            <SolidColorBrush x:Key="OutlineBrush" Color="#33FFFFFF"/>
-            <SolidColorBrush x:Key="HoverBrush"   Color="#28FFFFFF"/>
+            <!-- Дефолты палитры Noctalia (тёмная): те же роли, что в оригинале
+                 (src/theme/builtin_palettes.cpp). ApplyConfig заменяет их
+                 значениями из выбранного пресета и режима. -->
+            <SolidColorBrush x:Key="TextColor"           Color="#FFf3edf7"/>
+            <SolidColorBrush x:Key="DimColor"            Color="#FF7c80b4"/>
+            <SolidColorBrush x:Key="AccentBrush"         Color="#FFfff59b"/>
+            <SolidColorBrush x:Key="OnAccentBrush"       Color="#FF0e0e43"/>
+            <SolidColorBrush x:Key="SurfaceBrush"        Color="#F9070722"/>
+            <SolidColorBrush x:Key="SurfaceVariantBrush" Color="#F911112d"/>
+            <SolidColorBrush x:Key="OutlineBrush"        Color="#BF21215F"/>
+            <SolidColorBrush x:Key="CapsuleBrush"        Color="#00FFFFFF"/>
+            <SolidColorBrush x:Key="CapsuleBorderBrush"  Color="#00FFFFFF"/>
+            <SolidColorBrush x:Key="HoverBrush"          Color="#33a9aefe"/>
+            <CornerRadius x:Key="WidgetRadius">9</CornerRadius>
+            <Thickness x:Key="CapsulePadding">6,0,6,0</Thickness>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

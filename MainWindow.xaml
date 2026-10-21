@@ -3,44 +3,51 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="NoctaliaWin"
         WindowStyle="None"
-        AllowsTransparency="False"
+        AllowsTransparency="True"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
         Topmost="True"
         Background="Transparent"
-        Height="48"
+        FontFamily="Segoe UI Variable Text, Segoe UI"
+        Height="34"
         Width="1200"
         Loaded="OnLoaded"
         Closing="OnClosing">
 
     <Window.Resources>
+        <!-- базовый текст панели; weight приходит из конфига (font_weight) -->
         <Style x:Key="BarText" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="12.5"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
 
-        <Style x:Key="DimText" TargetType="TextBlock">
+        <Style x:Key="DimText" TargetType="TextBlock" BasedOn="{StaticResource BarText}">
             <Setter Property="Foreground" Value="{DynamicResource DimColor}"/>
-            <Setter Property="FontSize" Value="13"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
 
-        <!-- кнопка на панели; подсветка берётся из палитры темы (HoverBrush) -->
+        <!-- иконка начертания Tabler (подставляется в FontFamily кодом) -->
+        <Style x:Key="BarIcon" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+        </Style>
+
+        <!-- кнопка на панели: подсветка берётся из роли hover палитры -->
         <Style x:Key="BarButton" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
-            <Setter Property="Padding" Value="10,4"/>
-            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="Padding" Value="9,0"/>
+            <Setter Property="Margin" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="{TemplateBinding Background}" CornerRadius="8"
+                        <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                CornerRadius="{DynamicResource WidgetRadius}"
                                 Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -49,7 +56,7 @@
                                 <Setter TargetName="bg" Property="Background" Value="{DynamicResource HoverBrush}"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bg" Property="Opacity" Value="0.55"/>
+                                <Setter TargetName="bg" Property="Opacity" Value="0.6"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.4"/>
@@ -60,12 +67,13 @@
             </Setter>
         </Style>
 
-        <!-- обёртка виджета: мягкая подсветка под курсором (как hover_highlight в Noctalia) -->
+        <!-- обёртка виджета: капсула + мягкая подсветка (capsule / hover_highlight) -->
         <Style x:Key="WidgetBorder" TargetType="Border">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="CornerRadius" Value="8"/>
-            <Setter Property="Padding" Value="7,3"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="{DynamicResource CapsuleBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CapsuleBorderBrush}"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource WidgetRadius}"/>
+            <Setter Property="Padding" Value="{DynamicResource CapsulePadding}"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
             <Setter Property="Cursor" Value="Arrow"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
@@ -74,87 +82,42 @@
             </Style.Triggers>
         </Style>
 
-        <!-- индикатор рабочего стола -->
+        <!-- индикатор рабочего стола: пилюля с номером, как workspaces в Noctalia -->
         <Style x:Key="WsDot" TargetType="Border">
-            <Setter Property="Width" Value="22"/>
-            <Setter Property="Height" Value="22"/>
-            <Setter Property="CornerRadius" Value="7"/>
-            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="MinWidth" Value="24"/>
+            <Setter Property="CornerRadius" Value="{DynamicResource WidgetRadius}"/>
+            <Setter Property="Margin" Value="1,0"/>
+            <Setter Property="Padding" Value="4,0"/>
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="Cursor" Value="Hand"/>
         </Style>
     </Window.Resources>
 
-    <!-- Корневая рамка панели: окно само по размеру полосы, док к краю экрана -->
-    <Border x:Name="RootBorder"
-            CornerRadius="{Binding CornerRadius, RelativeSource={RelativeSource AncestorType=Window}}"
-            Background="{Binding BackgroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
-            BorderBrush="{DynamicResource OutlineBrush}" BorderThickness="1"
-            Margin="0">
-        <Grid Margin="{Binding BarPadding, RelativeSource={RelativeSource AncestorType=Window}}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+    <!-- Корневая сетка: полоса во всю ширину окна, фон/обводка — на RootBorder -->
+    <Grid x:Name="RootGrid">
+        <Border x:Name="RootBorder"
+                Background="{Binding BackgroundBrush, RelativeSource={RelativeSource AncestorType=Window}}"
+                BorderBrush="{Binding BarBorderBrush, RelativeSource={RelativeSource AncestorType=Window}}"
+                BorderThickness="{Binding BarBorderThickness, RelativeSource={RelativeSource AncestorType=Window}}">
+            <Grid Margin="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <!-- Три зоны, как start/center/end в Noctalia: виджеты расставляет ApplyLayout по конфигу -->
-            <StackPanel x:Name="StartPanel" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- Три зоны, как start/center/end: виджеты расставляет ApplyLayout -->
+                <StackPanel x:Name="StartPanel" Grid.Column="0" Orientation="Horizontal"
+                            VerticalAlignment="Stretch" Margin="{Binding StartPadding, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Background="Transparent" MouseRightButtonUp="StartPanel_RightClick"/>
 
-                <Border x:Name="WorkspacesWidget" Style="{StaticResource WidgetBorder}">
-                    <StackPanel x:Name="WorkspacesPanel" Orientation="Horizontal"/>
-                </Border>
+                <StackPanel x:Name="CenterPanel" Grid.Column="1" Orientation="Horizontal"
+                            HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
 
-                <Border x:Name="TitleWidget" Style="{StaticResource WidgetBorder}" ToolTip="Активное окно">
-                    <TextBlock x:Name="WindowTitleText" Style="{StaticResource DimText}" MaxWidth="320"/>
-                </Border>
-            </StackPanel>
-
-            <StackPanel x:Name="CenterPanel" Grid.Column="1" Orientation="Horizontal"
-                        HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Button x:Name="ClockButton" Style="{StaticResource BarButton}" Click="Clock_Click"
-                        ToolTip="Календарь">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock x:Name="TimeText" Style="{StaticResource BarText}" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="DateText" Style="{StaticResource DimText}" Margin="8,0,0,0"/>
-                    </StackPanel>
-                </Button>
-            </StackPanel>
-
-            <StackPanel x:Name="EndPanel" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-
-                <Border x:Name="StatsWidget" Style="{StaticResource WidgetBorder}" ToolTip="Ресурсы системы">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock x:Name="CpuText" Style="{StaticResource DimText}"/>
-                        <TextBlock x:Name="RamText" Style="{StaticResource DimText}" Margin="8,0,0,0"/>
-                    </StackPanel>
-                </Border>
-
-                <Border x:Name="BatteryWidget" Style="{StaticResource WidgetBorder}" ToolTip="Батарея"
-                        Visibility="Collapsed">
-                    <StackPanel x:Name="BatteryBadge" Orientation="Horizontal">
-                        <TextBlock x:Name="BatteryIcon" FontFamily="Segoe MDL2 Assets" FontSize="15"
-                                   Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="BatteryText" Style="{StaticResource BarText}" Margin="4,0,0,0" FontSize="12"/>
-                    </StackPanel>
-                </Border>
-
-                <Button x:Name="VolumeButton" Style="{StaticResource BarButton}" Click="Volume_Click"
-                        ToolTip="Громкость — клик, прокрутка — регулировка"
-                        MouseWheel="Volume_Scroll">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock x:Name="VolumeIcon" FontFamily="Segoe MDL2 Assets" FontSize="15"
-                                   Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="VolumeText" Style="{StaticResource BarText}" Margin="5,0,0,0" FontSize="12"/>
-                    </StackPanel>
-                </Button>
-
-                <Button x:Name="QuickSettingsButton" Style="{StaticResource BarButton}" Click="QuickSettings_Click"
-                        ToolTip="Быстрые настройки">
-                    <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="15"
-                               Foreground="{DynamicResource TextColor}" Text="&#xE713;"/>
-                </Button>
-            </StackPanel>
-        </Grid>
-    </Border>
+                <StackPanel x:Name="EndPanel" Grid.Column="2" Orientation="Horizontal"
+                            VerticalAlignment="Stretch" Margin="{Binding EndPadding, RelativeSource={RelativeSource AncestorType=Window}}"
+                            Background="Transparent" MouseRightButtonUp="EndPanel_RightClick"/>
+            </Grid>
+        </Border>
+    </Grid>
 </Window>

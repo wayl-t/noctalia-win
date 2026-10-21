@@ -1,44 +1,64 @@
 # NoctaliaWin 🌙
 
-**Нативная панель для Windows в стиле [Noctalia](https://github.com/noctalia-dev/noctalia).**
+**Нативная панель для Windows в стиле [Noctalia](https://github.com/noctalia-dev/noctalia) —
+вёрстка, цвета и виджеты один в один с оригиналом.**
 
-Noctalia — популярная оболочка десктопа для Linux/Wayland, но на Windows запустить её нельзя.
-NoctaliaWin — это написанная с нуля панель для Windows, которая повторяет её дух и поведение:
-док-полоса с размытым фоном (Acrylic), резервирующая рабочую область как панель задач,
-рабочие столы, часы, статистика системы, авто-скрытие и настройки — как в оригинале.
+Noctalia — оболочка десктопа для Linux/Wayland; на Windows её запустить нельзя (нет layer-shell,
+эксклюзивных зон и композиторского блюра). NoctaliaWin — написанная с нуля панель, которая
+воспроизводит **реальные значения из исходников и документации Noctalia v5**: палитру, геометрию,
+форму, состав виджетов и поведение.
+
+## Соответствие оригиналу
+
+| Параметр Noctalia | Значение в оригинале | В NoctaliaWin |
+| --- | --- | --- |
+| `thickness` | `34` | по умолчанию `34` |
+| `margin_ends` | `180` | по умолчанию `180` |
+| `margin_edge` | `10` | по умолчанию `10` |
+| `radius` | `12` | по умолчанию `12` |
+| `padding` | `14` | по умолчанию `14` |
+| `widget_spacing` | `6` | по умолчанию `6` |
+| `font_family` | `sans-serif` | Segoe UI Variable Text |
+| `font_weight` | `500` | по умолчанию `500` |
+| `border` / `border_width` | `outline` / `0.0` | по умолчанию так же |
+| `compositor_blur` | `true` | Acrylic |
+| `background_opacity` | `1.0` | по умолчанию `1.0` |
+| `capsule` | выключено | выключено |
+| `corner_radius_scale` | `1.0` | `scale` |
+| `time_format` / `date_format` | `{:%H:%M}` / `%A, %x` | `HH:mm` / `ddd, d MMM` |
+| `auto_hide_delay_ms` | `0` | по умолчанию `0` |
+| `smart_auto_hide` | — | есть |
+| порядок виджетов | `launcher, workspaces` / `clock` / `media, tray, notifications, network, volume, battery, control-center, session` | так же |
+| палитра | Noctalia `surface #070722`, `primary #fff59b`, `secondary #a9aefe`, `outline #21215F` | один в один |
 
 ## Возможности
 
-- 📌 **Работает как панель задач** — панель закреплена у края экрана и резервирует под себя рабочую область,
-  максимизированные окна под неё **не залезают**. Позиция переключается: `top` (по умолчанию, как у Noctalia) или `bottom`
-- 📐 **Высота, отступы, скругления** — `thickness`, `margin_ends` (врезка от краёв, как в оригинале),
-  `margin_edge`, `cornerRadius`, `padding`, `widgetSpacing`, прозрачность и Acrylic-размытие фона
-- 🎨 **Палитра и темы** — тёмная/светлая тема и цветовые роли (`background`, `surface`, `onSurface`,
-  `dim`, `primary`, `outline`) в конфиге; цвета можно не задавать — тогда берётся дефолт режима
-- 🧩 **Порядок виджетов start/center/end** — три зоны собираются из списков в конфиге,
-  ключи: `workspaces`, `title`, `clock`, `stats`, `battery`, `volume`, `settings`
-- 🫥 **Авто-скрытие** — панель уезжает за край, когда курсор не рядом, и выезжает при касании края;
-  задержка настраивается (`autoHideDelayMs`)
-- ✨ **Подсветка под курсором, подсказки и анимации** — мягкая подсветка виджета, tooltips,
-  плавное появление popup'ов и выезд панели (всё отключается в конфиге)
-- 🖥 **Рабочие столы** — индикатор виртуальных рабочих столов (COM API Windows 10), клик для переключения, «+» для создания
-- 🕐 **Часы и календарь** — клик по времени открывает календарь, форматы настраиваются
-- 📊 **Статистика** — загрузка CPU, использованная оперативная память
-- 🔋 **Батарея** — процент заряда и индикация зарядки (если ноутбук)
-- 🔊 **Громкость** — колёсико мыши прямо на панели регулирует громкость, клик — слайдер с mute
-- ⚙️ **Окно настроек** — панель, тема, цвета, часы и виджеты мышью;
-  само пишет тот же `config.json`
-- 🪟 **Заголовок активного окна**, **быстрые настройки** (яркость, автозагрузка, питание)
-- 📌 **Трей** — меню с настройками, папкой конфига, перезагрузкой конфига и выходом
-- ⌨️ **Ctrl+Alt+Space** — показать/скрыть панель, **Ctrl+Alt+S** — окно настроек
-- 🚫 Панель **не отвлекает фокус** от активного окна и скрыта из Alt-Tab
+- 📌 **Работает как панель задач** — панель закреплена у края и резервирует рабочую область,
+  максимизированные окна под неё **не залезают**. Позиция: `top` или `bottom`
+- 🎨 **Палитры один в один** — 10 встроенных пресетов оригинала (Noctalia, Ayu, Catppuccin, Dracula,
+  Eldritch, Gruvbox, Kanagawa, Nord, Rosé Pine, Tokyo-Night), тёмный и светлый варианты каждого;
+  режим `dark` / `light` / `auto` (как в Windows); `pure_black_dark`
+- 🫧 **Капсулы и вогнутые углы** — `capsule` с заливкой/радиусом/обводкой из ролей палитры,
+  `concave_edge_corners` (панель «вытекает» из края, как carve в оригинале)
+- 🧩 **Виджеты как в оригинале** — лаунчер, рабочие столы, часы, медиа, трей, уведомления,
+  сеть (скорость), громкость, батарея, control-center (быстрые настройки), session (питание),
+  заголовок окна, статистика. Зоны `start` / `center` / `end` собираются из конфига
+- 🕐 **Часы** — форматы `time_format` и `date_format`
+- 🔔 **Control center** — яркость, переключатели поведения, питание, настройки, выход
+- 🪟 **Лаунчер** — поиск по приложениям из меню «Пуск»
+- 🫥 **Авто-скрытие** — `auto_hide`, `smart_auto_hide` (видна, когда стол пуст),
+  `show_on_workspace_switch`, задержка `auto_hide_delay_ms`
+- ✨ **Подсветка под курсором, подсказки и анимации** — всё отключается
+- 🔊 **Громкость** — колёсико на панели регулирует, клик открывает слайдер с mute
+- ⌨️ **Ctrl+Alt+Space** — показать/скрыть, **Ctrl+Alt+S** — настройки
+- 🚫 Панель **не отбирает фокус** и скрыта из Alt-Tab
 
 ## Установка
 
 ### Вариант 1 — готовый exe
 
-Скачайте `NoctaliaWin.exe` из [Releases](../../releases) (или соберите сами, см. ниже) и запустите.
-Всё — одно приложение, ничего дополнительно ставить не нужно.
+Скачайте `NoctaliaWin.exe` из [Releases](../../releases) и запустите.
+Одно приложение, ничего дополнительно ставить не нужно.
 
 ### Вариант 2 — сборка из исходников
 
@@ -60,31 +80,47 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 {
   "Bar": {
     "Position": "top",
-    "Thickness": 48,
-    "MarginEnds": 100,
-    "MarginEdge": 0,
-    "CornerRadius": 14,
+    "Thickness": 34,
+    "MarginEnds": 180,
+    "MarginEdge": 10,
+    "CornerRadius": 12,
+    "ConcaveEdgeCorners": true,
     "BackgroundOpacity": 1.0,
     "Blur": true,
+    "Border": "outline",
+    "BorderWidth": 0.0,
     "Padding": 14,
     "WidgetSpacing": 6,
+    "Scale": 1.0,
+    "FontScale": 1.0,
+    "FontWeight": 500,
+    "Capsule": false,
+    "CapsuleFill": "surface_variant",
+    "CapsuleThickness": 0.76,
+    "CapsulePadding": 6,
+    "Shadow": true,
     "ReserveSpace": true,
     "AutoHide": false,
-    "AutoHideDelayMs": 400,
+    "AutoHideDelayMs": 0,
+    "SmartAutoHide": false,
+    "ShowOnWorkspaceSwitch": true,
     "HoverHighlight": true,
     "ShowTooltips": true,
     "Animations": true,
-    "Start": ["workspaces", "title"],
+    "DeadZoneLeft": "none",
+    "DeadZoneRight": "control-center",
+    "Start": ["launcher", "workspaces"],
     "Center": ["clock"],
-    "End": ["stats", "battery", "volume", "settings"]
+    "End": ["media", "tray", "notifications", "network", "volume", "battery", "control-center", "session"]
   },
   "Theme": {
     "Mode": "dark",
-    "Background": null,
+    "Palette": "Noctalia",
+    "PureBlackDark": false,
+    "Primary": null,
     "Surface": null,
     "OnSurface": null,
     "Dim": null,
-    "Primary": null,
     "Outline": null
   },
   "Clock": {
@@ -100,63 +136,88 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 | Ключ | Смысл |
 | --- | --- |
 | `Position` | `top` или `bottom` |
-| `Thickness` | высота полосы |
-| `MarginEnds` | отступ от краёв по длине полосы (`100` = врезка как у Noctalia) |
-| `MarginEdge` | отступ от экрана по нормали, `0` = прижата к краю |
-| `CornerRadius` | скругление углов |
-| `BackgroundOpacity` | прозрачность подложки, `0.2`–`1.0` |
-| `Blur` | Acrylic-размытие под панелью |
+| `Thickness` | высота полосы (`34` — как в оригинале) |
+| `MarginEnds` | отступ от краёв по длине полосы (`180` — как в оригинале) |
+| `MarginEdge` | отступ от экрана по нормали (`10` — как в оригинале) |
+| `CornerRadius` | скругление углов (`12`), можно задать по углам: `RadiusTopLeft` и т. д. |
+| `ConcaveEdgeCorners` | вогнутые углы у края экрана (работает при `MarginEdge = 0`, как в оригинале) |
+| `BackgroundOpacity` | прозрачность подложки, `0.0`–`1.0` |
+| `Blur` | Acrylic-размытие под панелью (`compositor_blur`) |
+| `Border` / `BorderWidth` | обводка полосы: роль палитры или `#hex`; `0` выключает |
 | `Padding` / `WidgetSpacing` | внутренний отступ и зазор между виджетами |
+| `Scale` / `FontScale` | общий масштаб и масштаб только текста |
+| `FontWeight` | насыщенность шрифта, CSS 100–1000 (по умолчанию `500`) |
+| `Capsule` + `CapsuleFill` / `CapsuleThickness` / `CapsuleRadius` / `CapsuleOpacity` / `CapsulePadding` / `CapsuleBorder` | капсулы под виджетами |
+| `Shadow` | тень под панелью |
 | `ReserveSpace` | держать свою полосу рабочей области (окна не залезают) |
-| `AutoHide` / `AutoHideDelayMs` | авто-скрытие и задержка, мс |
-| `HoverHighlight` / `ShowTooltips` / `Animations` | подсветка, подсказки, анимации |
+| `AutoHide` / `AutoHideDelayMs` / `SmartAutoHide` / `ShowOnWorkspaceSwitch` | авто-скрытие и его варианты |
+| `HoverHighlight` / `ShowTooltips` / `Animations` / `AnimationSpeed` | подсветка, подсказки, анимации |
+| `DeadZoneLeft` / `DeadZoneRight` | действие по клику на пустой отступ: `none`, `control-center`, `launcher`, `session`, `settings` |
 | `Start` / `Center` / `End` | списки виджетов по зонам |
+| `ShowWindowTitle` | добавить заголовок активного окна в зону `start` |
 
-Виджеты: `workspaces`, `title`, `clock`, `stats`, `battery`, `volume`, `settings`.
+Виджеты: `launcher`, `workspaces`, `title`, `clock`, `media`, `tray`, `notifications`, `network`,
+`volume`, `battery`, `control-center`, `session`, `stats`.
 
 ### Секция `Theme`
 
-Цвета — `#AARRGGBB` или `#RRGGBB`. Пустое значение (`null`) означает «взять дефолт выбранного режима»,
-так что для смены на светлую тему достаточно `"Mode": "light"`.
+`Palette` — имя пресета (`Noctalia`, `Ayu`, `Catppuccin`, `Dracula`, `Eldritch`, `Gruvbox`,
+`Kanagawa`, `Nord`, `Rosé Pine`, `Tokyo-Night`). `Mode` — `dark`, `light` или `auto`.
 
-Хочется свою палитру — задайте, например:
+Роли палитры (`Primary`, `Surface`, `OnSurface`, `Outline`, `Dim`, `Background` и др.) можно
+переопределить — пустое значение (`null`) означает «взять из пресета». В `Border`, `CapsuleFill`
+и других цветовых полях можно указывать как `#RRGGBB`/`#RRGGBBAA`, так и **имя роли** —
+например `"CapsuleFill": "primary"`. Хочется свою палитру:
 
 ```json
 "Theme": {
   "Mode": "dark",
-  "Background": "#CC11111B",
-  "Primary": "#FF89B4FA"
+  "Palette": "Noctalia",
+  "Primary": "#ff89b4fa",
+  "Surface": "#cc11111b"
 }
 ```
 
 ## Управление
 
 - Клик по рабочим столам — переключение, «+» — создать новый
-- Клик по часам — календарь, по громкости — слайдер, по шестерёнке — быстрые настройки
+- Клик по часам — календарь, по громкости — слайдер, по control-center — быстрые настройки
 - Колёсико на громкости — регулировка без открытия слайдера
+- ПКМ по пустому отступу справа — быстрые настройки (`dead_zone`)
 - Ctrl+Alt+Space — показать/скрыть, Ctrl+Alt+S — настройки
 - ПКМ по иконке в трее — меню, двойной клик — папка конфига
 
 ## Совместимость
 
 - **Windows 10 (1809–22H2)** — основная поддержка, проверено на 22H2 (build 19045)
-- Windows 11 — виртуальные рабочие столы используют API Windows 10, на 11 могут не работать; остальные функции должны работать
+- Windows 11 — виртуальные рабочие столы используют API Windows 10, на 11 могут не работать;
+  остальные функции должны работать
+
+## Ограничения
+
+Полного совпадения с оригиналом быть не может — в Windows нет layer-shell, эксклюзивных зон и
+композиторского блюра, а вместо MPRIS/DBus работают другие API. Что заменено:
+
+- **Размытие** — композиторский блюр → Acrylic Windows (`SetWindowCompositionAttribute`)
+- **Медиа** — MPRIS → активное медиа-окно (полный `GlobalSystemMediaTransportControls` в планах)
+- **Трей** — StatusNotifier → иконка в системном трее Windows
+- **Уведомления** — daemon уведомлений → центр уведомлений Windows
+- **Сеть** — NetworkManager → счётчики интерфейсов Windows
 
 ## Идеи для развития
 
-- [ ] Медиа-виджет (текущий трек, play/pause) через GlobalSystemMediaTransportControls
-- [ ] Виджеты погоды и сети
-- [ ] Панель уведомлений и control center
-- [ ] Лаунчер приложений (аналог rofi) по хоткею
-- [ ] Поддержка Windows 11 API виртуальных рабочих столов
+- [ ] Медиа-виджет через `GlobalSystemMediaTransportControls` (трек, play/pause, обложка)
+- [ ] Виджет погоды
+- [ ] Иконки Tabler как в оригинале (встроить шрифт)
 - [ ] Мультимониторность (сейчас панель на основном экране)
-- [ ] Готовые палитры-пресеты (community palettes у Noctalia)
+- [ ] Поддержка Windows 11 API виртуальных рабочих столов
 
 ## Технологии
 
 - C# / WPF (.NET 8), один самодостаточный exe (~180 МБ, содержит рантайм)
-- Win32: `SetWindowCompositionAttribute` (Acrylic), `Shell_NotifyIcon` (трей), `SetWindowRgn` (скругление),
-  `SystemParametersInfo` (резерв рабочей области), `GetCursorPos` (авто-скрытие)
+- Win32: `SetWindowCompositionAttribute` (Acrylic), `Shell_NotifyIcon` (трей),
+  `SetWindowRgn` + `CombineRgn` (скругления и вогнутые углы), `SystemParametersInfo`
+  (резерв рабочей области), `GetCursorPos` (авто-скрытие)
 - COM: виртуальные рабочие столы, Core Audio API (громкость)
 - WMI: яркость монитора
 
