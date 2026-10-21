@@ -1,0 +1,14 @@
+<Application x:Class="NoctaliaWin.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="BaseBrush"    Color="#FF1E1E2E"/>
+            <SolidColorBrush x:Key="OverlayBrush" Color="#FF313244"/>
+            <SolidColorBrush x:Key="TextBrush"    Color="#FFCDD6F4"/>
+            <SolidColorBrush x:Key="DimBrush"     Color="#FFA6ADC8"/>
+            <SolidColorBrush x:Key="AccentBrush"  Color="#FFCBA6F7"/>
+            <SolidColorBrush x:Key="HoverBrush"   Color="#33FFFFFF"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

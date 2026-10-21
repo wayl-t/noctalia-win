@@ -1,0 +1,16 @@
+## Build
+bin/
+obj/
+publish/
+out/
+*.user
+*.suo
+.vs/
+*.DotSettings.user
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## Локальные настройки
+*.local.json
