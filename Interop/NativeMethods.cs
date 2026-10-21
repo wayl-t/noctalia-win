@@ -356,4 +356,56 @@ internal static class NativeMethods
     internal static extern IntPtr ShellExecuteW(IntPtr hwnd, string lpOperation, string lpFile, string lpParameters, string lpDirectory, int nShowCmd);
 
     internal const int SW_SHOWNORMAL = 1;
+
+    // ---------- Открытие системных страниц (для вкладок control center) ----------
+
+    internal static void OpenUri(string uri)
+    {
+        try { ShellExecuteW(IntPtr.Zero, "open", uri, null, null, SW_SHOWNORMAL); }
+        catch { /* noop */ }
+    }
+
+    /// <summary>Летучая панель сети Windows (то же, что клик по значку Wi-Fi).</summary>
+    internal static void OpenNetworkFlyout()
+    {
+        try { OpenUri("ms-availablenetworks:"); }
+        catch { /* noop */ }
+    }
+
+    /// <summary>Параметры Bluetooth.</summary>
+    internal static void OpenBluetoothSettings() => OpenUri("ms-settings:bluetooth");
+
+    /// <summary>Параметры дисплея (ночной свет живёт внутри «Ночной свет»).</summary>
+    internal static void OpenDisplaySettings() => OpenUri("ms-settings:nightlight");
+
+    internal static void OpenPowerSettings() => OpenUri("ms-settings:powersleep");
+
+    internal static void OpenPersonalizationSettings() => OpenUri("ms-settings:personalization-background");
+
+    internal static void OpenWallpaperSettings() => OpenUri("ms-settings:personalization-background");
+
+    internal static void OpenSnippingTool() => OpenUri("ms-screenclip:");
+
+    // ---------- Медиа-клавиши и хранитель экрана ----------
+
+    [DllImport("user32.dll")]
+    private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, IntPtr dwExtraInfo);
+
+    private const uint KEYEVENTF_KEYUP = 0x0002;
+
+    /// <summary>Отправить медиа-клавишу (VK_MEDIA_NEXT_TRACK = 0xB0 и т. д.).</summary>
+    internal static void MediaKey(byte vk)
+    {
+        keybd_event(vk, 0, 0, IntPtr.Zero);
+        keybd_event(vk, 0, KEYEVENTF_KEYUP, IntPtr.Zero);
+    }
+
+    private const uint SPI_SETSCREENSAVEACTIVE = 0x0011;
+
+    /// <summary>Включить/выключить хранитель экрана — роль caffeine (не гасить экран).</summary>
+    internal static void SetScreenSaverActive(bool active)
+    {
+        try { SystemParametersInfo(SPI_SETSCREENSAVEACTIVE, active ? 1u : 0u, IntPtr.Zero, 0); }
+        catch { /* noop */ }
+    }
 }

@@ -61,17 +61,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private Thickness _endPadding = new(0, 0, 14, 0);
     private uint _acrylicArgb = 0xCC070722;
 
-    // текущая разрешённая палитра (роли Noctalia)
+    // С‚РµРєСѓС‰Р°СЏ СЂР°Р·СЂРµС€С‘РЅРЅР°СЏ РїР°Р»РёС‚СЂР° (СЂРѕР»Рё Noctalia)
     private Palettes.Palette _palette = Palettes.Resolve("Noctalia", "dark");
 
-    // построенные виджеты по ключам start/center/end
+    // РїРѕСЃС‚СЂРѕРµРЅРЅС‹Рµ РІРёРґР¶РµС‚С‹ РїРѕ РєР»СЋС‡Р°Рј start/center/end
     private readonly Dictionary<string, FrameworkElement> _widgets =
         new(System.StringComparer.OrdinalIgnoreCase);
 
-    // исходные тултипы, чтобы включать/выключать по конфигу
+    // РёСЃС…РѕРґРЅС‹Рµ С‚СѓР»С‚РёРїС‹, С‡С‚РѕР±С‹ РІРєР»СЋС‡Р°С‚СЊ/РІС‹РєР»СЋС‡Р°С‚СЊ РїРѕ РєРѕРЅС„РёРіСѓ
     private readonly Dictionary<FrameworkElement, object> _toolTips = new();
 
-    // авто-скрытие
+    // Р°РІС‚Рѕ-СЃРєСЂС‹С‚РёРµ
     private bool _barHidden;
     private DateTime _pointerLeftAtUtc = DateTime.UtcNow;
     private double _normalTop;
@@ -79,7 +79,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private SettingsWindow _settingsWindow;
 
-    // виджеты, которые нужно обновлять по таймеру
+    // РІРёРґР¶РµС‚С‹, РєРѕС‚РѕСЂС‹Рµ РЅСѓР¶РЅРѕ РѕР±РЅРѕРІР»СЏС‚СЊ РїРѕ С‚Р°Р№РјРµСЂСѓ
     private TextBlock _clockTime, _clockDate, _cpuText, _ramText, _netText, _batteryText, _volumeText;
     private TextBlock _batteryIcon, _volumeIcon, _netIcon, _mediaIcon, _notifIcon;
     private TextBlock _mediaText;
@@ -125,7 +125,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void Raise(string name) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-    /// <summary>Панель снизу? (bottom — как у панели задач)</summary>
+    /// <summary>РџР°РЅРµР»СЊ СЃРЅРёР·Сѓ? (bottom вЂ” РєР°Рє Сѓ РїР°РЅРµР»Рё Р·Р°РґР°С‡)</summary>
     private bool IsBottom =>
         string.Equals(ConfigService.Instance.Config.Bar.Position, "bottom",
             System.StringComparison.OrdinalIgnoreCase);
@@ -148,14 +148,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         ConfigService.Instance.ConfigChanged += ApplyConfig;
     }
 
-    // ================= Виджеты =================
+    // ================= Р’РёРґР¶РµС‚С‹ =================
 
-    /// <summary>Собирает виджеты панели в коде: так один набор элементов
-    /// переиспользуется любым порядком start/center/end из конфига.</summary>
+    /// <summary>РЎРѕР±РёСЂР°РµС‚ РІРёРґР¶РµС‚С‹ РїР°РЅРµР»Рё РІ РєРѕРґРµ: С‚Р°Рє РѕРґРёРЅ РЅР°Р±РѕСЂ СЌР»РµРјРµРЅС‚РѕРІ
+    /// РїРµСЂРµРёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Р»СЋР±С‹Рј РїРѕСЂСЏРґРєРѕРј start/center/end РёР· РєРѕРЅС„РёРіР°.</summary>
     private void BuildWidgets()
     {
         // --- start ---
-        _launcherButton = MakeIconButton("Лаунчер", "\uE71D", Launcher_Click);
+        _launcherButton = MakeIconButton("Р›Р°СѓРЅС‡РµСЂ", "\uE71D", Launcher_Click);
 
         _workspacesPanel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         _workspacesWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = _workspacesPanel };
@@ -163,14 +163,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _titleText = new TextBlock { Style = (Style)FindResource("DimText"), MaxWidth = 300, FontSize = 12 };
         _titleWidget = new Border
         {
-            Style = (Style)FindResource("WidgetBorder"), Child = _titleText, ToolTip = "Активное окно",
+            Style = (Style)FindResource("WidgetBorder"), Child = _titleText, ToolTip = "РђРєС‚РёРІРЅРѕРµ РѕРєРЅРѕ",
         };
 
         // --- center ---
         _clockTime = new TextBlock { Style = (Style)FindResource("BarText"), FontWeight = FontWeights.SemiBold };
         _clockDate = new TextBlock { Style = (Style)FindResource("DimText"), Margin = new Thickness(7, 0, 0, 0) };
         _clockButton = new Button { Style = (Style)FindResource("BarButton") };
-        _clockButton.ToolTip = "Календарь";
+        _clockButton.ToolTip = "РљР°Р»РµРЅРґР°СЂСЊ";
         _clockButton.Click += Clock_Click;
         var clockRow = new StackPanel { Orientation = Orientation.Horizontal };
         clockRow.Children.Add(_clockTime);
@@ -183,28 +183,28 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var mediaRow = new StackPanel { Orientation = Orientation.Horizontal };
         mediaRow.Children.Add(_mediaIcon);
         mediaRow.Children.Add(_mediaText);
-        _mediaWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = mediaRow, ToolTip = "Медиа", Visibility = Visibility.Collapsed };
+        _mediaWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = mediaRow, ToolTip = "РњРµРґРёР°", Visibility = Visibility.Collapsed };
 
         _notifIcon = MakeGlyph("\uE7ED");
         _notifWidget = new Border
         {
             Style = (Style)FindResource("WidgetBorder"),
-            Child = _notifIcon, ToolTip = "Уведомления", Cursor = Cursors.Hand,
+            Child = _notifIcon, ToolTip = "РЈРІРµРґРѕРјР»РµРЅРёСЏ", Cursor = Cursors.Hand,
         };
         _notifWidget.MouseLeftButtonDown += (_, _) => Notifications_Click();
 
-        _trayButton = MakeIconButton("Системный трей", "\uE71D", (_, _) => OpenTrayFallback());
-        _trayButton.Visibility = Visibility.Collapsed; // трей в Windows — через свою иконку
+        _trayButton = MakeIconButton("РЎРёСЃС‚РµРјРЅС‹Р№ С‚СЂРµР№", "\uE71D", (_, _) => OpenTrayFallback());
+        _trayButton.Visibility = Visibility.Collapsed; // С‚СЂРµР№ РІ Windows вЂ” С‡РµСЂРµР· СЃРІРѕСЋ РёРєРѕРЅРєСѓ
 
         _netIcon = MakeGlyph("\uE774");
         _netText = new TextBlock { Style = (Style)FindResource("DimText"), Margin = new Thickness(5, 0, 0, 0), FontSize = 12 };
         var netRow = new StackPanel { Orientation = Orientation.Horizontal };
         netRow.Children.Add(_netIcon);
         netRow.Children.Add(_netText);
-        _netWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = netRow, ToolTip = "Сеть" };
+        _netWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = netRow, ToolTip = "РЎРµС‚СЊ" };
         _volumeIcon = MakeGlyph("\uE767");
         _volumeText = new TextBlock { Style = (Style)FindResource("BarText"), Margin = new Thickness(5, 0, 0, 0), FontSize = 12 };
-        _volumeButton = new Button { Style = (Style)FindResource("BarButton"), ToolTip = "Громкость — клик, прокрутка — регулировка" };
+        _volumeButton = new Button { Style = (Style)FindResource("BarButton"), ToolTip = "Р“СЂРѕРјРєРѕСЃС‚СЊ вЂ” РєР»РёРє, РїСЂРѕРєСЂСѓС‚РєР° вЂ” СЂРµРіСѓР»РёСЂРѕРІРєР°" };
         var volRow = new StackPanel { Orientation = Orientation.Horizontal };
         volRow.Children.Add(_volumeIcon);
         volRow.Children.Add(_volumeText);
@@ -217,18 +217,18 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var batRow = new StackPanel { Orientation = Orientation.Horizontal };
         batRow.Children.Add(_batteryIcon);
         batRow.Children.Add(_batteryText);
-        _batteryWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = batRow, ToolTip = "Батарея", Visibility = Visibility.Collapsed };
+        _batteryWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = batRow, ToolTip = "Р‘Р°С‚Р°СЂРµСЏ", Visibility = Visibility.Collapsed };
 
-        _controlCenterButton = MakeIconButton("Быстрые настройки", "\uE713", QuickSettings_Click);
-        _sessionButton = MakeIconButton("Питание", "\uE7E8", Session_Click);
+        _controlCenterButton = MakeIconButton("Р‘С‹СЃС‚СЂС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё", "\uE713", QuickSettings_Click);
+        _sessionButton = MakeIconButton("РџРёС‚Р°РЅРёРµ", "\uE7E8", Session_Click);
 
-        // --- показатели ресурсов (не в дефолтном наборе оригинала, оставлены опцией) ---
+        // --- РїРѕРєР°Р·Р°С‚РµР»Рё СЂРµСЃСѓСЂСЃРѕРІ (РЅРµ РІ РґРµС„РѕР»С‚РЅРѕРј РЅР°Р±РѕСЂРµ РѕСЂРёРіРёРЅР°Р»Р°, РѕСЃС‚Р°РІР»РµРЅС‹ РѕРїС†РёРµР№) ---
         _cpuText = new TextBlock { Style = (Style)FindResource("DimText"), FontSize = 12 };
         _ramText = new TextBlock { Style = (Style)FindResource("DimText"), Margin = new Thickness(7, 0, 0, 0), FontSize = 12 };
         var statRow = new StackPanel { Orientation = Orientation.Horizontal };
         statRow.Children.Add(_cpuText);
         statRow.Children.Add(_ramText);
-        _statsWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = statRow, ToolTip = "Ресурсы системы" };
+        _statsWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = statRow, ToolTip = "Р РµСЃСѓСЂСЃС‹ СЃРёСЃС‚РµРјС‹" };
 
         void Reg(string key, FrameworkElement el) => _widgets[key] = el;
         Reg("launcher", _launcherButton);
@@ -271,11 +271,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return btn;
     }
 
-    /// <summary>Шрифт иконок Tabler, если он есть; иначе системные глифы Segoe MDL2.</summary>
+    /// <summary>РЁСЂРёС„С‚ РёРєРѕРЅРѕРє Tabler, РµСЃР»Рё РѕРЅ РµСЃС‚СЊ; РёРЅР°С‡Рµ СЃРёСЃС‚РµРјРЅС‹Рµ РіР»РёС„С‹ Segoe MDL2.</summary>
     private void ApplyIconFont(TextBlock tb)
     {
-        // Tabler идёт в комплекте оригинала; в нашей сборке берём Tabler, если
-        // он установлен, а иначе оставляем Segoe MDL2 Assets (глифы совпадают).
+        // Tabler РёРґС‘С‚ РІ РєРѕРјРїР»РµРєС‚Рµ РѕСЂРёРіРёРЅР°Р»Р°; РІ РЅР°С€РµР№ СЃР±РѕСЂРєРµ Р±РµСЂС‘Рј Tabler, РµСЃР»Рё
+        // РѕРЅ СѓСЃС‚Р°РЅРѕРІР»РµРЅ, Р° РёРЅР°С‡Рµ РѕСЃС‚Р°РІР»СЏРµРј Segoe MDL2 Assets (РіР»РёС„С‹ СЃРѕРІРїР°РґР°СЋС‚).
         var tabler = new FontFamily("Tabler Icons");
         tb.FontFamily = _hasTabler ? tabler : new FontFamily("Segoe MDL2 Assets");
     }
@@ -389,14 +389,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return IntPtr.Zero;
     }
 
-    // ================= Конфиг и внешний вид =================
+    // ================= РљРѕРЅС„РёРі Рё РІРЅРµС€РЅРёР№ РІРёРґ =================
 
-    /// <summary>Переопределение роли: пользовательское значение или роль пресета.</summary>
+    /// <summary>РџРµСЂРµРѕРїСЂРµРґРµР»РµРЅРёРµ СЂРѕР»Рё: РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕРµ Р·РЅР°С‡РµРЅРёРµ РёР»Рё СЂРѕР»СЊ РїСЂРµСЃРµС‚Р°.</summary>
     private static string Pick(string user, string preset) =>
         !string.IsNullOrWhiteSpace(user) ? user : preset;
 
-    /// <summary>Разрешает палитру: пресет Noctalia + переопределения ролей из конфига.
-    /// Спецзначение "auto" следует светлому режиму Windows.</summary>
+    /// <summary>Р Р°Р·СЂРµС€Р°РµС‚ РїР°Р»РёС‚СЂСѓ: РїСЂРµСЃРµС‚ Noctalia + РїРµСЂРµРѕРїСЂРµРґРµР»РµРЅРёСЏ СЂРѕР»РµР№ РёР· РєРѕРЅС„РёРіР°.
+    /// РЎРїРµС†Р·РЅР°С‡РµРЅРёРµ "auto" СЃР»РµРґСѓРµС‚ СЃРІРµС‚Р»РѕРјСѓ СЂРµР¶РёРјСѓ Windows.</summary>
     private Palettes.Palette ResolvePalette(ThemeConfig t)
     {
         string mode = t.Mode;
@@ -407,7 +407,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         if (t.PureBlackDark && !string.Equals(mode, "light", System.StringComparison.OrdinalIgnoreCase))
         {
-            // pure_black_dark: тёмные поверхности прижимаются к истинно чёрному
+            // pure_black_dark: С‚С‘РјРЅС‹Рµ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё РїСЂРёР¶РёРјР°СЋС‚СЃСЏ Рє РёСЃС‚РёРЅРЅРѕ С‡С‘СЂРЅРѕРјСѓ
             p = p with { Surface = "#000000", SurfaceVariant = "#0a0a14" };
         }
 
@@ -444,13 +444,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return false;
     }
 
-    /// <summary>Цвет роли или hex (#RGB/#RGBA/#RRGGBB/#RRGGBBAA).</summary>
+    /// <summary>Р¦РІРµС‚ СЂРѕР»Рё РёР»Рё hex (#RGB/#RGBA/#RRGGBB/#RRGGBBAA).</summary>
     private Color RoleColor(string spec, Palettes.Palette p, string fallback)
     {
         string v = string.IsNullOrWhiteSpace(spec) ? null : spec.Trim();
         if (v == null) return ParseColor(fallback);
 
-        // имя роли (snake_case) — маппим в палитру
+        // РёРјСЏ СЂРѕР»Рё (snake_case) вЂ” РјР°РїРїРёРј РІ РїР°Р»РёС‚СЂСѓ
         string role = v.Replace("-", "_").ToLowerInvariant();
         string resolved = role switch
         {
@@ -477,7 +477,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return v.StartsWith("#") ? ParseColorHex(v, fallback) : ParseColor(fallback);
     }
 
-    /// <summary>Разбор #RGB/#RGBA/#RRGGBB/#RRGGBBAA (как в Noctalia).</summary>
+    /// <summary>Р Р°Р·Р±РѕСЂ #RGB/#RGBA/#RRGGBB/#RRGGBBAA (РєР°Рє РІ Noctalia).</summary>
     private static Color ParseColorHex(string hex, string fallback)
     {
         try
@@ -521,7 +521,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var cfg = ConfigService.Instance.Config;
         var bar = cfg.Bar;
 
-        // --- палитра ---
+        // --- РїР°Р»РёС‚СЂР° ---
         _palette = ResolvePalette(cfg.Theme);
 
         var surface = ParseColor(_palette.Surface);
@@ -538,13 +538,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         Resources["OutlineBrush"] = Freeze(ApplyAlpha(outline, 0.75));
         Resources["CapsuleBorderBrush"] = Brushes.Transparent;
 
-        // hover: капсула при наведении. hover_highlight=false — подсветки нет.
+        // hover: РєР°РїСЃСѓР»Р° РїСЂРё РЅР°РІРµРґРµРЅРёРё. hover_highlight=false вЂ” РїРѕРґСЃРІРµС‚РєРё РЅРµС‚.
         var hoverColor = ParseColor(_palette.Hover);
         Resources["HoverBrush"] = bar.HoverHighlight
             ? Freeze(ApplyOpacity(Mix(surface, hoverColor, 0.55), 0.9))
             : Brushes.Transparent;
 
-        // --- капсулы ---
+        // --- РєР°РїСЃСѓР»С‹ ---
         var capsuleFillColor = RoleColor(bar.CapsuleFill, _palette, _palette.SurfaceVariant);
         Resources["CapsuleBrush"] = bar.Capsule
             ? Freeze(ApplyOpacity(capsuleFillColor, System.Math.Clamp(bar.CapsuleOpacity, 0, 1)))
@@ -563,10 +563,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             Resources["CapsuleBorderBrush"] = Freeze(ApplyAlpha(cb, 0.7));
         }
 
-        // --- геометрия полосы ---
+        // --- РіРµРѕРјРµС‚СЂРёСЏ РїРѕР»РѕСЃС‹ ---
         double opacity = System.Math.Clamp(bar.BackgroundOpacity, 0.0, 1.0);
         var bgBase = ParseColor(Pick(cfg.Theme.Background, _palette.Surface));
-        // margin_ends > 0 (полоса «врезкой») — фон чуть прозрачнее, как в оригинале
+        // margin_ends > 0 (РїРѕР»РѕСЃР° В«РІСЂРµР·РєРѕР№В») вЂ” С„РѕРЅ С‡СѓС‚СЊ РїСЂРѕР·СЂР°С‡РЅРµРµ, РєР°Рє РІ РѕСЂРёРіРёРЅР°Р»Рµ
         var bgColor = ApplyOpacity(bgBase, opacity);
         BackgroundBrush = Freeze(bgColor);
         _acrylicArgb = (uint)((bgColor.A << 24) | (bgColor.R << 16) | (bgColor.G << 8) | bgColor.B);
@@ -583,7 +583,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         Height = System.Math.Max(24, System.Math.Round(bar.Thickness * bar.Scale));
 
-        // тень под полосой ([shell.shadow])
+        // С‚РµРЅСЊ РїРѕРґ РїРѕР»РѕСЃРѕР№ ([shell.shadow])
         RootBorder.Effect = bar.Shadow && !bar.AutoHide
             ? new DropShadowEffect
             {
@@ -595,10 +595,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             }
             : null;
 
-        // --- жирность/размер шрифта (font_weight, font_scale) ---
+        // --- Р¶РёСЂРЅРѕСЃС‚СЊ/СЂР°Р·РјРµСЂ С€СЂРёС„С‚Р° (font_weight, font_scale) ---
         ApplyFont(bar);
 
-        // --- компоновка виджетов start/center/end ---
+        // --- РєРѕРјРїРѕРЅРѕРІРєР° РІРёРґР¶РµС‚РѕРІ start/center/end ---
         ApplyLayout(bar);
 
         ApplyTooltips(bar.ShowTooltips);
@@ -615,7 +615,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         });
     }
 
-    /// <summary>Жирность и масштаб текста: font_weight (CSS 100–1000) и font_scale.</summary>
+    /// <summary>Р–РёСЂРЅРѕСЃС‚СЊ Рё РјР°СЃС€С‚Р°Р± С‚РµРєСЃС‚Р°: font_weight (CSS 100вЂ“1000) Рё font_scale.</summary>
     private void ApplyFont(BarConfig bar)
     {
         var weight = CssToFontWeight(bar.FontWeight);
@@ -659,7 +659,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _ => FontWeights.Black,
     };
 
-    /// <summary>Расставляет виджеты по трём зонам согласно спискам start/center/end.</summary>
+    /// <summary>Р Р°СЃСЃС‚Р°РІР»СЏРµС‚ РІРёРґР¶РµС‚С‹ РїРѕ С‚СЂС‘Рј Р·РѕРЅР°Рј СЃРѕРіР»Р°СЃРЅРѕ СЃРїРёСЃРєР°Рј start/center/end.</summary>
     private void ApplyLayout(BarConfig bar)
     {
         static List<string> Clean(List<string> src) =>
@@ -670,7 +670,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var center = Clean(bar.Center);
         var end = Clean(bar.End);
 
-        // заголовок окна — опциональный, добавляется в конец start, если включён
+        // Р·Р°РіРѕР»РѕРІРѕРє РѕРєРЅР° вЂ” РѕРїС†РёРѕРЅР°Р»СЊРЅС‹Р№, РґРѕР±Р°РІР»СЏРµС‚СЃСЏ РІ РєРѕРЅРµС† start, РµСЃР»Рё РІРєР»СЋС‡С‘РЅ
         if (bar.ShowWindowTitle && !start.Contains("title", System.StringComparer.OrdinalIgnoreCase))
             start.Add("title");
 
@@ -678,7 +678,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         CenterPanel.Children.Clear();
         EndPanel.Children.Clear();
 
-        // widget_spacing = 3 DIP с каждой стороны, чтобы суммарный зазор совпал
+        // widget_spacing = 3 DIP СЃ РєР°Р¶РґРѕР№ СЃС‚РѕСЂРѕРЅС‹, С‡С‚РѕР±С‹ СЃСѓРјРјР°СЂРЅС‹Р№ Р·Р°Р·РѕСЂ СЃРѕРІРїР°Р»
         int gap = System.Math.Max(0, (int)System.Math.Round(bar.WidgetSpacing / 2.0));
         var margin = new Thickness(gap, 0, gap, 0);
 
@@ -695,7 +695,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         foreach (var k in end) Place(k, EndPanel);
     }
 
-    /// <summary>Включает/выключает тултипы, сохраняя исходные тексты.</summary>
+    /// <summary>Р’РєР»СЋС‡Р°РµС‚/РІС‹РєР»СЋС‡Р°РµС‚ С‚СѓР»С‚РёРїС‹, СЃРѕС…СЂР°РЅСЏСЏ РёСЃС…РѕРґРЅС‹Рµ С‚РµРєСЃС‚С‹.</summary>
     private void ApplyTooltips(bool show)
     {
         foreach (var el in _widgets.Values)
@@ -727,7 +727,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private static Color ApplyAlpha(Color c, double alpha) =>
         Color.FromArgb((byte)System.Math.Round(255 * System.Math.Clamp(alpha, 0, 1)), c.R, c.G, c.B);
 
-    /// <summary>Смешение двух цветов; t=0 → a, t=1 → b.</summary>
+    /// <summary>РЎРјРµС€РµРЅРёРµ РґРІСѓС… С†РІРµС‚РѕРІ; t=0 в†’ a, t=1 в†’ b.</summary>
     private static Color Mix(Color a, Color b, double t)
     {
         t = System.Math.Clamp(t, 0, 1);
@@ -776,8 +776,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         NativeMethods.EnableAcrylic(_hwnd, _acrylicArgb, bar.Blur);
     }
 
-    /// <summary>Форма окна: скругления по углам и, при concave_edge_corners,
-    /// вогнутые углы со стороны края экрана (как carve в Noctalia).</summary>
+    /// <summary>Р¤РѕСЂРјР° РѕРєРЅР°: СЃРєСЂСѓРіР»РµРЅРёСЏ РїРѕ СѓРіР»Р°Рј Рё, РїСЂРё concave_edge_corners,
+    /// РІРѕРіРЅСѓС‚С‹Рµ СѓРіР»С‹ СЃРѕ СЃС‚РѕСЂРѕРЅС‹ РєСЂР°СЏ СЌРєСЂР°РЅР° (РєР°Рє carve РІ Noctalia).</summary>
     private void ApplyBarRegion()
     {
         if (_hwnd == IntPtr.Zero) return;
@@ -787,13 +787,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         int w = (int)System.Math.Round(Width * px);
         int h = (int)System.Math.Round(Height * px);
 
-        // углы в физических пикселях
+        // СѓРіР»С‹ РІ С„РёР·РёС‡РµСЃРєРёС… РїРёРєСЃРµР»СЏС…
         int TopLeft = Radius(bar.RadiusTopLeft, bar);
         int TopRight = Radius(bar.RadiusTopRight, bar);
         int BottomLeft = Radius(bar.RadiusBottomLeft, bar);
         int BottomRight = Radius(bar.RadiusBottomRight, bar);
 
-        // вогнутость возможна только при margin_edge = 0, как в оригинале
+        // РІРѕРіРЅСѓС‚РѕСЃС‚СЊ РІРѕР·РјРѕР¶РЅР° С‚РѕР»СЊРєРѕ РїСЂРё margin_edge = 0, РєР°Рє РІ РѕСЂРёРіРёРЅР°Р»Рµ
         bool concave = bar.ConcaveEdgeCorners && System.Math.Max(0, bar.MarginEdge) == 0;
 
         NativeMethods.SetBarRegion(
@@ -815,7 +815,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         catch { return 1.0; }
     }
 
-    // ================= Рабочая область =================
+    // ================= Р Р°Р±РѕС‡Р°СЏ РѕР±Р»Р°СЃС‚СЊ =================
 
     private void ReserveWorkArea()
     {
@@ -825,7 +825,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         ApplyWorkArea(ComputeReservedArea(bar));
     }
 
-    /// <summary>Полная рабочая область основного экрана в пикселях (без нашего резерва).</summary>
+    /// <summary>РџРѕР»РЅР°СЏ СЂР°Р±РѕС‡Р°СЏ РѕР±Р»Р°СЃС‚СЊ РѕСЃРЅРѕРІРЅРѕРіРѕ СЌРєСЂР°РЅР° РІ РїРёРєСЃРµР»СЏС… (Р±РµР· РЅР°С€РµРіРѕ СЂРµР·РµСЂРІР°).</summary>
     private NativeMethods.RECT ScreenWorkArea()
     {
         double scale = PixelsPerDip();
@@ -868,7 +868,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private NativeMethods.RECT ComputeReservedArea(BarConfig bar)
     {
-        // резерв = margin_edge + thickness, в физических пикселях
+        // СЂРµР·РµСЂРІ = margin_edge + thickness, РІ С„РёР·РёС‡РµСЃРєРёС… РїРёРєСЃРµР»СЏС…
         int reserve = (int)System.Math.Ceiling(
             (System.Math.Max(0, bar.MarginEdge) + Height) * PixelsPerDip());
 
@@ -907,7 +907,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         ApplyWorkArea(expected);
     }
 
-    // ================= Авто-скрытие =================
+    // ================= РђРІС‚Рѕ-СЃРєСЂС‹С‚РёРµ =================
 
     private void UpdateAutoHide(BarConfig bar)
     {
@@ -932,7 +932,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void AutoHideTick(object sender, EventArgs e)
     {
         try { AutoHideTickCore(); }
-        catch { /* тик авто-скрытия не должен ронять панель */ }
+        catch { /* С‚РёРє Р°РІС‚Рѕ-СЃРєСЂС‹С‚РёСЏ РЅРµ РґРѕР»Р¶РµРЅ СЂРѕРЅСЏС‚СЊ РїР°РЅРµР»СЊ */ }
     }
 
     private void AutoHideTickCore()
@@ -961,7 +961,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        // смарт-автоскрытие: панель видна, только когда нет окон на столе
+        // СЃРјР°СЂС‚-Р°РІС‚РѕСЃРєСЂС‹С‚РёРµ: РїР°РЅРµР»СЊ РІРёРґРЅР°, С‚РѕР»СЊРєРѕ РєРѕРіРґР° РЅРµС‚ РѕРєРѕРЅ РЅР° СЃС‚РѕР»Рµ
         if (bar.SmartAutoHide && !bar.AutoHide)
         {
             bool hasWindow = HasWindowsOnCurrentDesktop();
@@ -1012,7 +1012,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         MoveTop(_normalTop, animate);
     }
 
-    private void Peek() // кратко показать при смене рабочего стола
+    private void Peek() // РєСЂР°С‚РєРѕ РїРѕРєР°Р·Р°С‚СЊ РїСЂРё СЃРјРµРЅРµ СЂР°Р±РѕС‡РµРіРѕ СЃС‚РѕР»Р°
     {
         var bar = ConfigService.Instance.Config.Bar;
         if (!(bar.AutoHide || bar.SmartAutoHide) || !bar.ShowOnWorkspaceSwitch) return;
@@ -1039,7 +1039,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    // ================= Popup'ы =================
+    // ================= Popup'С‹ =================
 
     private Popup OpenPopup(FrameworkElement child, FrameworkElement target)
     {
@@ -1057,7 +1057,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return popup;
     }
 
-    /// <summary>Общая «карточка» popup'а: surface + outline + радиус, как панели Noctalia.</summary>
+    /// <summary>РћР±С‰Р°СЏ В«РєР°СЂС‚РѕС‡РєР°В» popup'Р°: surface + outline + СЂР°РґРёСѓСЃ, РєР°Рє РїР°РЅРµР»Рё Noctalia.</summary>
     private Border MakeCard(FrameworkElement content, double padding = 14, double width = double.NaN)
     {
         var card = new Border
@@ -1073,11 +1073,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return card;
     }
 
-    // ================= Триггеры зон =================
+    // ================= РўСЂРёРіРіРµСЂС‹ Р·РѕРЅ =================
 
     private void StartPanel_RightClick(object sender, MouseButtonEventArgs e)
     {
-        // правый клик по отступу: как dead_zone в Noctalia
+        // РїСЂР°РІС‹Р№ РєР»РёРє РїРѕ РѕС‚СЃС‚СѓРїСѓ: РєР°Рє dead_zone РІ Noctalia
         OpenDeadZone("left");
         e.Handled = true;
     }
@@ -1111,7 +1111,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    // ================= Часы =================
+    // ================= Р§Р°СЃС‹ =================
 
     private void UpdateClock()
     {
@@ -1128,7 +1128,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        // календарь в стиле Noctalia: шапка + большая дата + сетка
+        // РєР°Р»РµРЅРґР°СЂСЊ РІ СЃС‚РёР»Рµ Noctalia: С€Р°РїРєР° + Р±РѕР»СЊС€Р°СЏ РґР°С‚Р° + СЃРµС‚РєР°
         var stack = new StackPanel { Width = 268 };
 
         var header = new TextBlock
@@ -1154,7 +1154,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _calendarPopup = OpenPopup(card, _clockButton);
     }
 
-    // ================= Рабочие столы =================
+    // ================= Р Р°Р±РѕС‡РёРµ СЃС‚РѕР»С‹ =================
 
     private void RefreshWorkspaces(bool force = false)
     {
@@ -1186,13 +1186,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             int index = i;
             bool active = i == current;
 
-            // пилюля рабочего стола: активная — заливка primary, остальные — прозрачные
+            // РїРёР»СЋР»СЏ СЂР°Р±РѕС‡РµРіРѕ СЃС‚РѕР»Р°: Р°РєС‚РёРІРЅР°СЏ вЂ” Р·Р°Р»РёРІРєР° primary, РѕСЃС‚Р°Р»СЊРЅС‹Рµ вЂ” РїСЂРѕР·СЂР°С‡РЅС‹Рµ
             var pill = new Border
             {
                 Style = (Style)FindResource("WsDot"),
                 Background = active ? accent : Brushes.Transparent,
                 MinWidth = active ? 26 : 22,
-                ToolTip = tips ? $"Рабочий стол {i + 1}" : null,
+                ToolTip = tips ? $"Р Р°Р±РѕС‡РёР№ СЃС‚РѕР» {i + 1}" : null,
             };
             pill.Child = new TextBlock
             {
@@ -1213,7 +1213,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 Style = (Style)FindResource("WsDot"),
                 Background = Brushes.Transparent,
-                ToolTip = tips ? "Создать рабочий стол" : null,
+                ToolTip = tips ? "РЎРѕР·РґР°С‚СЊ СЂР°Р±РѕС‡РёР№ СЃС‚РѕР»" : null,
             };
             addBtn.Child = new TextBlock
             {
@@ -1230,7 +1230,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (changed) Peek();
     }
 
-    // ================= Активное окно =================
+    // ================= РђРєС‚РёРІРЅРѕРµ РѕРєРЅРѕ =================
 
     private void RefreshWindowTitle()
     {
@@ -1260,7 +1260,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _titleText.Text = title;
     }
 
-    // ================= Статистика =================
+    // ================= РЎС‚Р°С‚РёСЃС‚РёРєР° =================
 
     private void UpdateStats()
     {
@@ -1270,7 +1270,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _cpuText.Text = $"{(int)_stats.CpuPercent}%";
         _ramText.Text = $"{_stats.RamUsedGb}/{_stats.RamTotalGb} GB";
 
-        // сеть: скорость приёма/передачи
+        // СЃРµС‚СЊ: СЃРєРѕСЂРѕСЃС‚СЊ РїСЂРёС‘РјР°/РїРµСЂРµРґР°С‡Рё
         if (_netText != null && _netWidget != null)
         {
             _netText.Text = _stats.NetText ?? "";
@@ -1306,13 +1306,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _     => "\uE859",
     };
 
-    // ================= Медиа (лучшее доступное окно) =================
+    // ================= РњРµРґРёР° (Р»СѓС‡С€РµРµ РґРѕСЃС‚СѓРїРЅРѕРµ РѕРєРЅРѕ) =================
 
     private void UpdateMedia()
     {
         if (_mediaWidget == null) return;
 
-        // в Windows нет MPRIS: показываем активное медиа-окно, если оно есть
+        // РІ Windows РЅРµС‚ MPRIS: РїРѕРєР°Р·С‹РІР°РµРј Р°РєС‚РёРІРЅРѕРµ РјРµРґРёР°-РѕРєРЅРѕ, РµСЃР»Рё РѕРЅРѕ РµСЃС‚СЊ
         string title = "";
         var hwnd = NativeMethods.GetForegroundWindow();
         if (hwnd != IntPtr.Zero && NativeMethods.IsWindowVisible(hwnd))
@@ -1344,7 +1344,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _mediaText.Text = title;
     }
 
-    // ================= Громкость =================
+    // ================= Р“СЂРѕРјРєРѕСЃС‚СЊ =================
 
     private void UpdateVolumeUI()
     {
@@ -1361,7 +1361,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         float vol = _audio.GetVolume();
 
         _volumeIcon.Text = muted || vol <= 0f ? "\uE74F" : (vol < 0.34f ? "\uE992" : vol < 0.67f ? "\uE993" : "\uE767");
-        _volumeText.Text = muted ? "—" : $"{(int)(vol * 100)}%";
+        _volumeText.Text = muted ? "вЂ”" : $"{(int)(vol * 100)}%";
 
         if (_volumePopup != null && _volumePopup.IsOpen &&
             _volumeSlider != null && !_volumeSlider.IsMouseOver)
@@ -1391,7 +1391,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         stack.Children.Add(new TextBlock
         {
-            Text = "Громкость",
+            Text = "Р“СЂРѕРјРєРѕСЃС‚СЊ",
             Foreground = TextBrush,
             FontWeight = FontWeights.SemiBold,
             FontSize = 13,
@@ -1408,7 +1408,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _volumeSlider.ValueChanged += (_, _) => _audio.SetVolume((float)(_volumeSlider.Value / 100.0));
         stack.Children.Add(_volumeSlider);
 
-        var muteBtn = MakeCardButton("Выключить звук", () => { _audio.ToggleMute(); UpdateVolumeUI(); });
+        var muteBtn = MakeCardButton("Р’С‹РєР»СЋС‡РёС‚СЊ Р·РІСѓРє", () => { _audio.ToggleMute(); UpdateVolumeUI(); });
         stack.Children.Add(muteBtn);
 
         _volumePopup = OpenPopup(MakeCard(stack), _volumeButton);
@@ -1458,7 +1458,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return template;
     }
 
-    // ================= Лаунчер =================
+    // ================= Р›Р°СѓРЅС‡РµСЂ =================
 
     private void Launcher_Click(object sender, RoutedEventArgs e)
     {
@@ -1468,7 +1468,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        // Лаунчер в стиле Noctalia: поле поиска + список приложений из меню «Пуск»
+        // Р›Р°СѓРЅС‡РµСЂ РІ СЃС‚РёР»Рµ Noctalia: РїРѕР»Рµ РїРѕРёСЃРєР° + СЃРїРёСЃРѕРє РїСЂРёР»РѕР¶РµРЅРёР№ РёР· РјРµРЅСЋ В«РџСѓСЃРєВ»
         var apps = LoadStartMenuApps();
 
         var stack = new StackPanel { Width = 420 };
@@ -1525,7 +1525,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             stack.Children.Add(new TextBlock
             {
-                Text = "Приложения не найдены в меню «Пуск».",
+                Text = "РџСЂРёР»РѕР¶РµРЅРёСЏ РЅРµ РЅР°Р№РґРµРЅС‹ РІ РјРµРЅСЋ В«РџСѓСЃРєВ».",
                 Foreground = DimBrush,
                 Margin = new Thickness(2, 4, 0, 0),
             });
@@ -1568,81 +1568,38 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         return result;
     }
 
-    // ================= Быстрые настройки (control center) =================
+    // ================= Р‘С‹СЃС‚СЂС‹Рµ РЅР°СЃС‚СЂРѕР№РєРё (control center) =================
+
+    // ================= Control center (РїР°РЅРµР»СЊ РІРєР»Р°РґРѕРє РєР°Рє РІ РѕСЂРёРіРёРЅР°Р»Рµ) =================
+
+    private ControlCenterWindow _controlCenter;
 
     private void QuickSettings_Click(object sender, RoutedEventArgs e)
     {
-        if (_quickPopup != null && _quickPopup.IsOpen)
+        if (_controlCenter != null)
         {
-            _quickPopup.IsOpen = false;
+            _controlCenter.Close();
+            _controlCenter = null;
             return;
         }
 
-        var cfg = ConfigService.Instance.Config;
-        var stack = new StackPanel { Width = 280 };
-
-        // Подсветка/яркость
-        int brightness = _stats.GetBrightness();
-        if (brightness >= 0)
-        {
-            stack.Children.Add(MakeHeader("Яркость"));
-            var slider = new Slider
-            {
-                Minimum = 5, Maximum = 100, Value = brightness,
-                Margin = new Thickness(0, 2, 0, 10),
-            };
-            slider.ValueChanged += (_, _) => _stats.SetBrightness((int)slider.Value);
-            stack.Children.Add(slider);
-        }
-
-        stack.Children.Add(MakeHeader("Поведение"));
-
-        stack.Children.Add(MakeToggle("Не пускать окна под панель", cfg.Bar.ReserveSpace, v =>
-        {
-            cfg.Bar.ReserveSpace = v; ConfigService.Instance.Save(); ApplyConfig();
-        }));
-        stack.Children.Add(MakeToggle("Автоматически прятать панель", cfg.Bar.AutoHide, v =>
-        {
-            cfg.Bar.AutoHide = v; ConfigService.Instance.Save(); ApplyConfig();
-        }));
-        stack.Children.Add(MakeToggle("Капсулы под виджетами", cfg.Bar.Capsule, v =>
-        {
-            cfg.Bar.Capsule = v; ConfigService.Instance.Save(); ApplyConfig();
-        }));
-        stack.Children.Add(MakeToggle("Запускать вместе с Windows", cfg.AutoStart, v =>
-        {
-            cfg.AutoStart = v; ConfigService.Instance.Save(); ConfigService.Instance.ApplyAutoStart();
-        }));
-
-        stack.Children.Add(new Separator { Margin = new Thickness(0, 8, 0, 8) });
-
-        // Питание и выход (session)
-        stack.Children.Add(MakeCardButton("Заблокировать", () => NativeMethods.LockWorkStation()));
-        stack.Children.Add(MakeCardButton("Сон", () => NativeMethods.SetSuspendState(false, false, false)));
-        stack.Children.Add(MakeCardButton("Перезагрузка", () =>
-            System.Diagnostics.Process.Start("shutdown.exe", "/r /t 0")));
-        stack.Children.Add(MakeCardButton("Выключение", () =>
-            System.Diagnostics.Process.Start("shutdown.exe", "/s /t 0")));
-
-        stack.Children.Add(new Separator { Margin = new Thickness(0, 8, 0, 8) });
-
-        stack.Children.Add(MakeCardButton("Настройки...", () =>
-        {
-            if (_quickPopup != null) _quickPopup.IsOpen = false;
-            OpenSettings();
-        }));
-        stack.Children.Add(MakeCardButton("Папка конфига", () => ConfigService.Instance.OpenConfigFolder()));
-        stack.Children.Add(MakeCardButton("Выход", () => Application.Current?.Shutdown()));
-
-        var card = MakeCard(new ScrollViewer
-        {
-            Content = stack,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            MaxHeight = 470,
-            Background = Brushes.Transparent,
-        }, 14);
-
-        _quickPopup = OpenPopup(card, _controlCenterButton);
+        var cc = new ControlCenterWindow(_stats, _audio);
+        cc.ApplyPalette(
+            Freeze(ApplyOpacity(ParseColor(Pick(ConfigService.Instance.Config.Theme.Background, _palette.Surface)), 0.98)),
+            Freeze(ApplyOpacity(ParseColor(_palette.Surface), 0.98)),
+            Freeze(ApplyOpacity(ParseColor(_palette.SurfaceVariant), 0.98)),
+            Freeze(ParseColor(_palette.OnSurface)),
+            Freeze(ParseColor(_palette.OnSurfaceVariant)),
+            Freeze(ParseColor(_palette.Primary)),
+            Freeze(ParseColor(_palette.OnPrimary)),
+            Freeze(ParseColor(_palette.Secondary)),
+            Freeze(ParseColor(_palette.Outline)),
+            Freeze(ApplyOpacity(Mix(ParseColor(_palette.Surface), ParseColor(_palette.Hover), 0.55), 0.9)));
+        cc.OpenSettingsRequested += OpenSettings;
+        cc.Closed += (_, _) => _controlCenter = null;
+        _controlCenter = cc;
+        cc.Show();
+        cc.Activate();
     }
 
     private CheckBox MakeToggle(string label, bool isChecked, Action<bool> onChange)
@@ -1678,17 +1635,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
 
         var stack = new StackPanel { Width = 300 };
-        stack.Children.Add(MakeHeader("Уведомления"));
+        stack.Children.Add(MakeHeader("РЈРІРµРґРѕРјР»РµРЅРёСЏ"));
 
-        // в Windows нет daemon-а уведомлений: показываем только кнопку центра
+        // РІ Windows РЅРµС‚ daemon-Р° СѓРІРµРґРѕРјР»РµРЅРёР№: РїРѕРєР°Р·С‹РІР°РµРј С‚РѕР»СЊРєРѕ РєРЅРѕРїРєСѓ С†РµРЅС‚СЂР°
         stack.Children.Add(new TextBlock
         {
-            Text = "Центр уведомлений Windows",
+            Text = "Р¦РµРЅС‚СЂ СѓРІРµРґРѕРјР»РµРЅРёР№ Windows",
             Foreground = DimBrush,
             TextWrapping = TextWrapping.Wrap,
             Margin = new Thickness(2, 2, 0, 8),
         });
-        stack.Children.Add(MakeCardButton("Открыть центр уведомлений", () =>
+        stack.Children.Add(MakeCardButton("РћС‚РєСЂС‹С‚СЊ С†РµРЅС‚СЂ СѓРІРµРґРѕРјР»РµРЅРёР№", () =>
         {
             if (_quickPopup != null) _quickPopup.IsOpen = false;
             NativeMethods.OpenActionCenter();
@@ -1704,11 +1661,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OpenTrayFallback()
     {
-        // запасной путь: если иконка трея скрыта, показать меню у её места
+        // Р·Р°РїР°СЃРЅРѕР№ РїСѓС‚СЊ: РµСЃР»Рё РёРєРѕРЅРєР° С‚СЂРµСЏ СЃРєСЂС‹С‚Р°, РїРѕРєР°Р·Р°С‚СЊ РјРµРЅСЋ Сѓ РµС‘ РјРµСЃС‚Р°
         OpenSettings();
     }
 
-    // ================= Настройки =================
+    // ================= РќР°СЃС‚СЂРѕР№РєРё =================
 
     private void OpenSettings()
     {

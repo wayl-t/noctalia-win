@@ -44,7 +44,10 @@ Noctalia — оболочка десктопа для Linux/Wayland; на Window
   сеть (скорость), громкость, батарея, control-center (быстрые настройки), session (питание),
   заголовок окна, статистика. Зоны `start` / `center` / `end` собираются из конфига
 - 🕐 **Часы** — форматы `time_format` и `date_format`
-- 🔔 **Control center** — яркость, переключатели поведения, питание, настройки, выход
+- 🔔 **Control center** — панель вкладок как в оригинале: 700×520, компактный сайдбар с 12 вкладками
+  (главная, медиа, звук, экран, система, питание, сеть, bluetooth, погода, календарь, уведомления,
+  экранное время), шапка с заголовком и действиями, карточки пользователя/медиа/даты-времени и
+  сетка быстрых ярлыков (wifi, bluetooth, caffeine, nightlight, notification, power_profile)
 - 🪟 **Лаунчер** — поиск по приложениям из меню «Пуск»
 - 🫥 **Авто-скрытие** — `auto_hide`, `smart_auto_hide` (видна, когда стол пуст),
   `show_on_workspace_switch`, задержка `auto_hide_delay_ms`
@@ -127,6 +130,16 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
     "TimeFormat": "HH:mm",
     "DateFormat": "ddd, d MMM"
   },
+  "ControlCenter": {
+    "Width": 700,
+    "Height": 520,
+    "ShowSidebar": true,
+    "CompactSidebar": true,
+    "ShowShortcutLabels": true,
+    "ShowSessionButton": true,
+    "Shortcuts": [ "wifi", "bluetooth", "caffeine", "nightlight", "notification", "power_profile" ],
+    "HiddenTabs": []
+  },
   "AutoStart": false
 }
 ```
@@ -177,6 +190,17 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
   "Surface": "#cc11111b"
 }
 ```
+
+### Секция `ControlCenter`
+
+| Ключ | Смысл |
+| --- | --- |
+| `Width` / `Height` | размеры панели (`700` × `520` — как в оригинале) |
+| `ShowSidebar` / `CompactSidebar` | боковая колонка вкладок; `compact` — только иконки (`sidebar_mode = compact`) |
+| `ShowShortcutLabels` | подписи под иконками ярлыков дашборда |
+| `ShowSessionButton` | кнопка «Питание» в шапке вкладки |
+| `Shortcuts` | до 6 ярлыков дашборда: `wifi`, `bluetooth`, `caffeine`, `nightlight`, `notification`, `power_profile`, `wallpaper`, `screen_recorder`, `session` |
+| `HiddenTabs` | скрытые вкладки: `home`, `media`, `audio`, `monitor`, `system`, `power`, `network`, `bluetooth`, `weather`, `calendar`, `notifications`, `screen-time` |
 
 ## Управление
 

@@ -11,7 +11,42 @@ public sealed class PanelConfig
     public BarConfig Bar { get; set; } = new();
     public ThemeConfig Theme { get; set; } = new();
     public ClockConfig Clock { get; set; } = new();
+    public ControlCenterConfig ControlCenter { get; set; } = new();
     public bool AutoStart { get; set; }
+}
+
+/// <summary>Секция control_center: размеры, сайдбар и быстрые ярлыки.
+/// Дефолты — как в ControlCenterConfig оригинала (width 700, высота 520).</summary>
+public sealed class ControlCenterConfig
+{
+    /// <summary>Логическая ширина панели (width). Дефолт оригинала — 700.</summary>
+    public int Width { get; set; } = 700;
+
+    /// <summary>Высота панели; в оригинале preferredHeight = scaled(520).</summary>
+    public int Height { get; set; } = 520;
+
+    /// <summary>Показывать боковую колонку с вкладками (sidebar_mode != "none").</summary>
+    public bool ShowSidebar { get; set; } = true;
+
+    /// <summary>Компактный сайдбар: только иконки, без подписей (sidebar_mode = compact).</summary>
+    public bool CompactSidebar { get; set; } = true;
+
+    /// <summary>Показывать подписи на ярлыках дашборда (show_shortcut_labels).</summary>
+    public bool ShowShortcutLabels { get; set; } = true;
+
+    /// <summary>Кнопка «Питание» в шапке вкладки (show_session_button).</summary>
+    public bool ShowSessionButton { get; set; } = true;
+
+    /// <summary>Быстрые ярлыки дашборда (до 6), как defaultControlCenterShortcuts:
+    /// wifi, bluetooth, caffeine, nightlight, notification, power_profile.</summary>
+    public List<string> Shortcuts { get; set; } = new()
+    {
+        "wifi", "bluetooth", "caffeine", "nightlight", "notification", "power_profile",
+    };
+
+    /// <summary>Скрытые вкладки (hidden_tabs): ключи home/media/audio/monitor/system/power/
+    /// network/bluetooth/weather/calendar/notifications/screen-time.</summary>
+    public List<string> HiddenTabs { get; set; } = new();
 }
 
 /// <summary>Секция bar: геометрия, поведение и порядок виджетов.
