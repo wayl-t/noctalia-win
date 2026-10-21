@@ -223,14 +223,15 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 композиторского блюра, а вместо MPRIS/DBus работают другие API. Что заменено:
 
 - **Размытие** — композиторский блюр → Acrylic Windows (`SetWindowCompositionAttribute`)
-- **Медиа** — MPRIS → активное медиа-окно (полный `GlobalSystemMediaTransportControls` в планах)
+- **Медиа** — MPRIS → `GlobalSystemMediaTransportControls` (трек, артист, альбом, статус, обложка;
+  клик — play/pause, ПКМ/колесо — переключение трека)
 - **Трей** — StatusNotifier → иконка в системном трее Windows
 - **Уведомления** — daemon уведомлений → центр уведомлений Windows
 - **Сеть** — NetworkManager → счётчики интерфейсов Windows
 
 ## Идеи для развития
 
-- [ ] Медиа-виджет через `GlobalSystemMediaTransportControls` (трек, play/pause, обложка)
+- [x] Медиа-виджет через `GlobalSystemMediaTransportControls` (трек, play/pause, обложка)
 - [ ] Виджет погоды
 - [ ] Иконки Tabler как в оригинале (встроить шрифт)
 - [ ] Мультимониторность (сейчас панель на основном экране)

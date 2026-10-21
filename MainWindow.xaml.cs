@@ -31,6 +31,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private readonly AudioService _audio = new();
     private readonly SystemStatsService _stats = new();
     private readonly TrayIconService _tray = new();
+    private readonly MediaService _media = new();
 
     private readonly DispatcherTimer _clockTimer;
     private readonly DispatcherTimer _statsTimer;
@@ -183,7 +184,21 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var mediaRow = new StackPanel { Orientation = Orientation.Horizontal };
         mediaRow.Children.Add(_mediaIcon);
         mediaRow.Children.Add(_mediaText);
-        _mediaWidget = new Border { Style = (Style)FindResource("WidgetBorder"), Child = mediaRow, ToolTip = "РњРµРґРёР°", Visibility = Visibility.Collapsed };
+        _mediaWidget = new Border
+        {
+            Style = (Style)FindResource("WidgetBorder"),
+            Child = mediaRow, ToolTip = "Медиа: клик — play/pause, ПКМ — следующий",
+            Cursor = Cursors.Hand, Visibility = Visibility.Collapsed,
+        };
+        // клик — play/pause, как левый клик по mediaControl в оригинале
+        _mediaWidget.MouseLeftButtonUp += (_, _) => _ = _media.TogglePlayPauseAsync();
+        _mediaWidget.MouseRightButtonUp += (_, e) => { _ = _media.NextAsync(); e.Handled = true; };
+        _mediaWidget.MouseWheel += (_, e) =>
+        {
+            if (e.Delta > 0) _ = _media.NextAsync();
+            else _ = _media.PreviousAsync();
+            e.Handled = true;
+        };
 
         _notifIcon = MakeGlyph("\uE7ED");
         _notifWidget = new Border
@@ -342,6 +357,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _tray.Dispose();
         _audio.Dispose();
         _stats.Dispose();
+        _media.Dispose();
         NativeMethods.UnregisterHotKey(_hwnd, 1);
         NativeMethods.UnregisterHotKey(_hwnd, 2);
     }
@@ -1308,40 +1324,49 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     // ================= РњРµРґРёР° (Р»СѓС‡С€РµРµ РґРѕСЃС‚СѓРїРЅРѕРµ РѕРєРЅРѕ) =================
 
+    private bool _mediaRefreshing;
+
     private void UpdateMedia()
     {
         if (_mediaWidget == null) return;
 
-        // РІ Windows РЅРµС‚ MPRIS: РїРѕРєР°Р·С‹РІР°РµРј Р°РєС‚РёРІРЅРѕРµ РјРµРґРёР°-РѕРєРЅРѕ, РµСЃР»Рё РѕРЅРѕ РµСЃС‚СЊ
-        string title = "";
-        var hwnd = NativeMethods.GetForegroundWindow();
-        if (hwnd != IntPtr.Zero && NativeMethods.IsWindowVisible(hwnd))
+        // WinRT-вызовы асинхронные: обновляем «снимок» и перерисовываем по завершении.
+        // RefreshAsync вызывается на потоке UI (STA) — WinRT-проекция требует STA.
+        if (!_mediaRefreshing)
         {
-            var sb = new System.Text.StringBuilder(256);
-            NativeMethods.GetWindowText(hwnd, sb, sb.Capacity);
-            NativeMethods.GetWindowThreadProcessId(hwnd, out uint pid);
-            try
-            {
-                using var proc = System.Diagnostics.Process.GetProcessById((int)pid);
-                string name = proc.ProcessName;
-                if (name is "Spotify" or "SpotifyAB.SpotifyMusic" or "MusicBee" or "foobar2000"
-                    or "vlc" or "wmplayer" or "AIMP" or "Dopamine" or "YouTube Music")
-                {
-                    title = sb.ToString();
-                }
-            }
-            catch { }
+            _mediaRefreshing = true;
+            _ = RefreshMediaAsync();
         }
+    }
 
-        if (string.IsNullOrWhiteSpace(title))
+    private async Task RefreshMediaAsync()
+    {
+        try { await _media.RefreshAsync().ConfigureAwait(true); }
+        catch { /* noop */ }
+        finally
+        {
+            _mediaRefreshing = false;
+            RenderMedia();
+        }
+    }
+
+    /// <summary>Отрисовать виджет по последнему снимку <see cref="_media"/>.</summary>
+    private void RenderMedia()
+    {
+        if (_mediaWidget == null) return;
+
+        if (!_media.Available)
         {
             _mediaWidget.Visibility = Visibility.Collapsed;
             return;
         }
 
         _mediaWidget.Visibility = Visibility.Visible;
-        _mediaIcon.Text = "\uE768";
-        _mediaText.Text = title;
+        // play/pause иконка, как в оригинале (media widget показывает статус воспроизведения)
+        _mediaIcon.Text = _media.IsPlaying ? "\uE769" : "\uE768";
+        _mediaText.Text = string.IsNullOrWhiteSpace(_media.Artist)
+            ? _media.Title
+            : $"{_media.Title} — {_media.Artist}";
     }
 
     // ================= Р“СЂРѕРјРєРѕСЃС‚СЊ =================
@@ -1583,7 +1608,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        var cc = new ControlCenterWindow(_stats, _audio);
+        var cc = new ControlCenterWindow(_stats, _audio, _media);
         cc.ApplyPalette(
             Freeze(ApplyOpacity(ParseColor(Pick(ConfigService.Instance.Config.Theme.Background, _palette.Surface)), 0.98)),
             Freeze(ApplyOpacity(ParseColor(_palette.Surface), 0.98)),
@@ -1600,6 +1625,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         _controlCenter = cc;
         cc.Show();
         cc.Activate();
+        cc.RefreshDataAsync();
     }
 
     private CheckBox MakeToggle(string label, bool isChecked, Action<bool> onChange)

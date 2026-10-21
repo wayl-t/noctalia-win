@@ -62,6 +62,7 @@ public sealed class ControlCenterWindow : Window
 
     private readonly SystemStatsService _stats;
     private readonly AudioService _audio;
+    private readonly MediaService _media;
     private readonly PanelConfig _cfg;
 
     private string _activeTab = "home";
@@ -76,14 +77,14 @@ public sealed class ControlCenterWindow : Window
     private Brush _background;
 
     private bool _caffeine;
-    private string _mediaTitle = "", _mediaArtist = "";
 
     public event Action OpenSettingsRequested;
 
-    public ControlCenterWindow(SystemStatsService stats, AudioService audio)
+    public ControlCenterWindow(SystemStatsService stats, AudioService audio, MediaService media)
     {
         _stats = stats;
         _audio = audio;
+        _media = media;
         _cfg = ConfigService.Instance.Config;
 
         WindowStyle = WindowStyle.None;
@@ -103,9 +104,10 @@ public sealed class ControlCenterWindow : Window
     }
 
     /// <summary>Обновляет данные карточек (медиа/система) при открытии.</summary>
-    public void RefreshData()
+    public async void RefreshDataAsync()
     {
         _stats.Refresh();
+        if (_media != null) await _media.RefreshAsync();
         RebuildTabBodies();
     }
 
@@ -455,7 +457,7 @@ public sealed class ControlCenterWindow : Window
         info.Children.Add(Line(Environment.UserName, FontSizeTitle * 1.12, _onSurface, FontWeights.Bold));
         info.Children.Add(Line($"{Environment.UserName}@{Environment.MachineName}", FontSizeCaption, _onSurfaceVariant));
         info.Children.Add(Line($"В работе {Uptime()}", FontSizeCaption, _onSurfaceVariant));
-        info.Children.Add(Line("NoctaliaWin 0.4", FontSizeCaption, _onSurfaceVariant));
+        info.Children.Add(Line("NoctaliaWin 0.4.1", FontSizeCaption, _onSurfaceVariant));
         dock.Children.Add(Place(info, 2));
 
         card.Child = dock;
@@ -486,7 +488,8 @@ public sealed class ControlCenterWindow : Window
         return $"{t.Minutes} мин";
     }
 
-    /// <summary>Карточка медиа: обложка (disc), трек/артист/статус. Клик — вкладка media.</summary>
+    /// <summary>Карточка медиа: обложка (или disc-заглушка), трек/артист/статус.
+    /// Клик — вкладка media (addCardOverlay в оригинале).</summary>
     private FrameworkElement BuildMediaCard()
     {
         var card = SectionCard();
@@ -504,28 +507,30 @@ public sealed class ControlCenterWindow : Window
             CornerRadius = new CornerRadius(RadiusLg),
             Background = B(_surfaceVariant, "#F911112d"),
             VerticalAlignment = VerticalAlignment.Center,
-            Child = Glyph("\uE8D6", art * 0.55, _onSurfaceVariant),
         };
+        var artImage = ArtworkImage(art);
+        artBox.Child = artImage ?? (UIElement)Glyph("\uE8D6", art * 0.55, _onSurfaceVariant);
         row.Children.Add(Place(artBox, 0));
 
+        bool available = _media?.Available == true;
         var text = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
         text.Children.Add(new TextBlock
         {
-            Text = string.IsNullOrWhiteSpace(_mediaTitle) ? "Нет активного плеера" : _mediaTitle,
+            Text = available ? _media.Title : "Нет активного плеера",
             FontSize = FontSizeBody * 0.95,
             Foreground = B(_onSurface, "#FFf3edf7"),
             TextTrimming = TextTrimming.CharacterEllipsis,
         });
         text.Children.Add(new TextBlock
         {
-            Text = string.IsNullOrWhiteSpace(_mediaArtist) ? "" : _mediaArtist,
+            Text = available ? _media.Artist : "",
             FontSize = FontSizeCaption,
             Foreground = B(_onSurfaceVariant, "#FF7c80b4"),
             TextTrimming = TextTrimming.CharacterEllipsis,
         });
         text.Children.Add(new TextBlock
         {
-            Text = "простой",
+            Text = available ? (_media.IsPlaying ? "играет" : "пауза") : "простой",
             FontSize = FontSizeCaption,
             Foreground = B(_onSurfaceVariant, "#FF7c80b4"),
         });
@@ -534,6 +539,30 @@ public sealed class ControlCenterWindow : Window
 
         card.MouseLeftButtonUp += (_, _) => SelectTab("media");
         return card;
+    }
+
+    /// <summary>Обложка трека как Image, если <see cref="MediaService.Artwork"/> непустой.</summary>
+    private System.Windows.Controls.Image ArtworkImage(double size)
+    {
+        var bytes = _media?.Artwork;
+        if (bytes == null || bytes.Length == 0) return null;
+        try
+        {
+            var bmp = new System.Windows.Media.Imaging.BitmapImage();
+            bmp.BeginInit();
+            bmp.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            bmp.StreamSource = new System.IO.MemoryStream(bytes);
+            bmp.DecodePixelWidth = (int)(size * 2);
+            bmp.EndInit();
+            bmp.Freeze();
+            return new System.Windows.Controls.Image
+            {
+                Source = bmp,
+                Stretch = Stretch.UniformToFill,
+                Width = size, Height = size,
+            };
+        }
+        catch { return null; }
     }
 
     /// <summary>Карточка даты/времени: время (bold, primary, fontSizeTitle×1.7) + дата.</summary>
@@ -750,14 +779,48 @@ public sealed class ControlCenterWindow : Window
     private FrameworkElement BuildMedia()
     {
         var body = new StackPanel();
-        body.Children.Add(SectionHeader("Медиа"));
-        body.Children.Add(CardLabel("Управление активным плеером Windows."));
-        body.Children.Add(new Border { Height = SpaceSm });
-        var row = new StackPanel { Orientation = Orientation.Horizontal };
-        row.Children.Add(CardButton("Play/Pause", () => NativeMethods.MediaKey(0xB3)));
-        row.Children.Add(CardButton("Следующий", () => NativeMethods.MediaKey(0xB0)));
-        row.Children.Add(CardButton("Предыдущий", () => NativeMethods.MediaKey(0xB1)));
-        body.Children.Add(row);
+        bool available = _media?.Available == true;
+
+        // шапка карточки: обложка + трек/артист/альбом (как media_tab оригинала)
+        var head = SectionCard();
+        var row = new Grid();
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(SpaceMd) });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        double art = ControlHeightLg * 2.2;
+        var artBox = new Border
+        {
+            Width = art, Height = art,
+            CornerRadius = new CornerRadius(RadiusLg),
+            Background = B(_surfaceVariant, "#F911112d"),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        artBox.Child = ArtworkImage(art) ?? (UIElement)Glyph("\uE8D6", art * 0.5, _onSurfaceVariant);
+        row.Children.Add(Place(artBox, 0));
+
+        var info = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        info.Children.Add(Line(available ? _media.Title : "Нет активного плеера",
+            FontSizeTitle, _onSurface, FontWeights.Bold));
+        if (available)
+        {
+            if (!string.IsNullOrWhiteSpace(_media.Artist))
+                info.Children.Add(Line(_media.Artist, FontSizeBody, _onSurfaceVariant));
+            if (!string.IsNullOrWhiteSpace(_media.Album))
+                info.Children.Add(Line(_media.Album, FontSizeCaption, _onSurfaceVariant));
+            info.Children.Add(Line(_media.IsPlaying ? "играет" : "пауза", FontSizeCaption, _primary));
+        }
+        row.Children.Add(Place(info, 2));
+        head.Child = row;
+        body.Children.Add(head);
+
+        body.Children.Add(new Border { Height = SpaceMd });
+
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal };
+        buttons.Children.Add(CardButton("Предыдущий", async () => { await _media.PreviousAsync(); await _media.RefreshAsync(); RebuildTabBodies(); }));
+        buttons.Children.Add(CardButton("Play/Pause", async () => { await _media.TogglePlayPauseAsync(); await _media.RefreshAsync(); RebuildTabBodies(); }));
+        buttons.Children.Add(CardButton("Следующий", async () => { await _media.NextAsync(); await _media.RefreshAsync(); RebuildTabBodies(); }));
+        body.Children.Add(buttons);
         return body;
     }
 
